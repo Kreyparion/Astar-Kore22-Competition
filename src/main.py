@@ -194,7 +194,7 @@ def plan_secure_route_home_21(me : Player, boards : List[Board], fleet: Fleet, s
     res = []
     for plan in plans:
         plan2 = decompose(plan)
-        reward,length = evaluate_plan(boards,plan2,pos,nb_ships,spawn_cost,size)
+        reward,length,_ = evaluate_plan(boards,plan2,pos,nb_ships,spawn_cost,size)
         if reward > 0:
             if length >= i:
                 res.append((reward,plan))
@@ -450,7 +450,7 @@ def generate_all_looped_plans(nb_move : int, plan: List[List[Union[str,int]]]=[[
         
     return res
 
-def generate_all_plans_A_to_B(boards: List[Board],a: Point,b: Point,nb_moves: int):
+def generate_all_plans_A_to_B(boards: List[Board],a: Point,b: Point,nb_moves: int, need_precise_end=False):
     board = boards[0]
     size = board.configuration.size
     def North_South(p: Point,s: Point,size) -> Tuple[int,Direction]:
@@ -467,11 +467,25 @@ def generate_all_plans_A_to_B(boards: List[Board],a: Point,b: Point,nb_moves: in
             return ((p.x-s.x)%size,Direction.EAST)
         return ((s.x-p.x)%size,Direction.WEST)
 
+    def generate_all_plans_in_2_directions(nb_moves: int, t1 : int, dir1: Direction, t2: int, dir2: Direction, plan: List[List[Union[str,int]]]=[[]], last_move : Boolean=True) -> List[List[Union[str,int]]]:
+        if t1 == 0 and  t2 == 0:
+            return plan
+        if nb_moves == 0:
+            return []
+        res = []
+        if last_move == False:
+            for i in range(9):
+                if t1>=i+1:
+                    res += generate_all_plans_in_2_directions(nb_moves-1, t1-i-1,dir1,t2,dir2, add_to_all(plan,i+1), last_move=True)
+        res += generate_all_plans_in_2_directions(nb_moves-1, t2-1,dir2,t1,dir1, add_to_all(plan,dir1.to_char()), last_move=False)            
+        return res
+    
     # First North-South
     travel_distance,dir = North_South(a,b,size)
     travel_distance2,dir2 = West_East(a,b,size)
-     
-    
+    return generate_all_plans_in_2_directions(nb_moves,travel_distance,dir,travel_distance2,dir2) + generate_all_plans_in_2_directions(nb_moves,travel_distance2,dir2,travel_distance,dir)
+
+
 # 1. -------- Kore Calcul
 
 def fast_kore_calcul(next_pos: List[Point],board : Board):
@@ -537,6 +551,7 @@ def retrieve_cost(boards : List[Board], next_pos: List[Point], nb_ship: int):
         dist = distance_to_closest(next_pos[len(next_pos)-1-i], [shipyard.position for shipyard in me.shipyards], size)[0]
         if dist <= len(next_pos)-1-i:
             return (nb_ship + 1 + dist//2,len(next_pos)-1-i)
+    return (50,len(next_pos))
     
 
 
@@ -590,7 +605,7 @@ def evaluate_plan(boards: List[Board],plan:List[Union[Direction,int]],pos,nb_shi
     next_pos = next_pos[:real_duration+1]
     kore = fast_precise_kore_calcul(next_pos,boards)* math.log(nb_ships) / 20
     danger = danger_level(boards,next_pos,nb_ships)
-    return kore-danger*danger*500-retrieve_costs*spawn_cost*0.2-real_duration-(nb_ships_left<=0)*10000,real_duration
+    return kore-danger*danger*500-retrieve_costs*spawn_cost*0.2-real_duration-(nb_ships_left<=0)*10000,real_duration,nb_ships_left
 
 def best_fleet_overall(boards : List[Board], shipyard_id : ShipyardId):
     board = boards[0]
@@ -616,6 +631,7 @@ def best_fleet_overall(boards : List[Board], shipyard_id : ShipyardId):
 def safe_plan_to_pos(boards: List[Board],shipyard_id: ShipyardId,pos: Point,ship_number_to_send: int):
     board = boards[0]
     size = board.configuration.size
+    convert_cost = board.configuration.convert_cost
     spawn_cost = board.configuration.spawn_cost
     me = board.current_player
     if shipyard_id not in me.shipyard_ids:
@@ -623,15 +639,15 @@ def safe_plan_to_pos(boards: List[Board],shipyard_id: ShipyardId,pos: Point,ship
     shipyard_pos = board.shipyards[shipyard_id].position
     nb_moves = maximum_flight_plan_length(ship_number_to_send)
     all_possible_plans = generate_all_plans_A_to_B(boards,shipyard_pos,pos,nb_moves-1)
-    nb_ships = 8
+    nb_ships = ship_number_to_send
     best_plan = []
-    best_global_reward = 0
+    best_global_reward = -700
     for plan in all_possible_plans:
-        global_reward = evaluate_plan(boards,plan,pos,nb_ships,spawn_cost,size)[0]
-        if global_reward > best_global_reward:
+        global_reward,_,nb_ships_left = evaluate_plan(boards,plan,pos,nb_ships,spawn_cost,size)
+        if nb_ships_left>= convert_cost and global_reward > best_global_reward:
             best_plan = plan
             best_global_reward = global_reward
-    logger.info(f"{best_global_reward,best_plan}")
+    return best_plan
 
 
 def concat(a : List[List[Any]]) -> List[Any]:
@@ -688,7 +704,7 @@ def matrix_kore(board : Board,matrix,p,size):
         for j in range(len(matrix[0])):
             val = matrix[i][j]
             if val != 0:
-                newp = translate_n_m(p, Direction.North,i-middle[0],Direction.WEST,j-middle[1],size)
+                newp = translate_n_m(p, Direction.NORTH,i-middle[0],Direction.WEST,j-middle[1],size)
                 res += val*board.get_cell_at_point(newp).kore
     return res
 
@@ -711,8 +727,8 @@ def best_pos_shipyard(boards: List[Board], shipyard_id: ShipyardId) -> Union[Poi
     liste_ops_shipyards_pos = list_ops_shipyards_position(board)
     best_pos = None
     best_kore = 0
-    for i in range(9):
-        for j in range(9):
+    for i in range(10):
+        for j in range(10):
             if 14 >= i+j >= 3:
                 for k in range(4):
                     time_board = boards[-1]
@@ -812,14 +828,17 @@ def agent(obs: Observation, config: Configuration):
         # ----- builder
         remaining_kore = me.kore
         convert_cost = board.configuration.convert_cost
-        if action == None and remaining_kore > 300 and shipyard.max_spawn > 5:
+        if action == None and remaining_kore > 300:
             if shipyard.ship_count >= convert_cost + 20:
                 pos = best_pos_shipyard(boards,shipyard.id)
                 ship_number_to_send = max(convert_cost + 20, int(shipyard.ship_count/2))
-                plan = safe_plan_to_pos(boards,shipyard.id,pos,ship_number_to_send) + "C"
-                shipyard.next_action = ShipyardAction.launch_fleet_with_flight_plan(ship_number_to_send, plan)
-                action = shipyard.next_action
+                if pos != None:
+                    plan = safe_plan_to_pos(boards,shipyard.id,pos,ship_number_to_send)
+                    if plan != []:
+                        shipyard.next_action = ShipyardAction.launch_fleet_with_flight_plan(ship_number_to_send, compose(plan) + "C")
+                        action = shipyard.next_action
         # ---- invader
+        """
         if action == {}:
             action = None
         if action == None and shipyard.ship_count >= 100 and remaining_kore > 500:
@@ -829,13 +848,16 @@ def agent(obs: Observation, config: Configuration):
                     path = get_shortest_flight_path_between(shipyard.position,p_op_shipyard,size)
                     shipyard.next_action = ShipyardAction.launch_fleet_with_flight_plan(board.get_shipyard_at_point(p_op_shipyard).ship_count + 23,path)
                     action = shipyard.next_action
+        """
         if action == {}:
             action = None
         if action == None:
-            if nb_ships >= 29: #+ 21*(1-no_endangered):
-                plan = compose(best_fleet_overall(boards,shipyard.id))
-                if plan != "":
-                    action = ShipyardAction.launch_fleet_with_flight_plan(8, plan)
+            chance_to_summon = max(0.95-(kore_left>100)*0.1-math.sqrt(kore_left)*0.01,0)
+            if random.random()<chance_to_summon:
+                if nb_ships >= 29: #+ 21*(1-no_endangered):
+                    plan = compose(best_fleet_overall(boards,shipyard.id))
+                    if plan != "":
+                        action = ShipyardAction.launch_fleet_with_flight_plan(8, plan)
         if action == None:
             if kore_left >= spawn_cost:
                 action = ShipyardAction.spawn_ships(int(min(shipyard.max_spawn,kore_left/spawn_cost)))
@@ -863,7 +885,6 @@ def agent(obs: Observation, config: Configuration):
 
 
 from kaggle_environments import make
-from Best_agent_from_beta.main import agent2
 
 env = make("kore_fleets", debug=True)
 print(env.name, env.version)

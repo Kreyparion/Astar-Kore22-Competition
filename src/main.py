@@ -30,9 +30,62 @@ class Timer:
         
         return result
 
+class Index():
+    def __init__(self, val: int, size):
+        self._val = int(val)%(size*size)
+        self.size = size
+    def __add__(self, val):
+        x,y = self._to_coord()
+        if isinstance(val, Index):
+            x2,y2 = val._to_coord()
+            return Index._from_coord((x+x2,y+y2),self.size)
+        return self._val + val
+    def __iadd__(self, val):
+        if isinstance(val, Index):
+            self._val = self._val + val
+            return self
+        return self._val + val
+    def __str__(self):
+        return str(self._val)
+    
+    def __mul__(self, val: int):
+        (x,y) = self._to_coord()
+        return Index._from_coord((x*val,y*val),self.size)
+    
+    def __int__(self) -> int:
+        return int(self._val)
+    
+    def to_coord(self)-> Tuple[int,int]:
+        y, x = divmod(self._val, self.size)
+        return (x, self.size - y - 1)
+    
+    @staticmethod
+    def from_coord(t,size):
+        (x,y) = t
+        return Index((size - y % size - 1) * size + x % size,size)
+    
+    @staticmethod
+    def from_dir(dir: Direction,size):
+        if dir == Direction.NORTH:
+            return Index(-2*size,size)
+        if dir == Direction.SOUTH:
+            return Index(0,size)
+        if dir == Direction.EAST:
+            return Index(-size+1,size)
+        if dir == Direction.WEST:
+            return Index(-1,size)
 
+    def translate_n(self, dir: Direction, times: int):
+        return self + Index._from_dir(dir,self.size) * times
 
+    def translate_n_m(self, dir1: Direction, n: int, dir2: Direction, m: int):
+        i = self._translate_n(dir1,n)
+        return i._translate_n(dir2,m)
 
+    _from_dir = from_dir
+    _translate_n = translate_n
+    _from_coord = from_coord
+    _to_coord = to_coord
 
 def gauss_int(mini,maxi,mu, sigma):
     return min(max(round(random.gauss(mu, sigma)), mini),maxi)
@@ -852,9 +905,9 @@ def agent(obs: Observation, config: Configuration):
         if action == {}:
             action = None
         if action == None:
-            chance_to_summon = max(0.95-(kore_left>100)*0.1-math.sqrt(kore_left)*0.01,0)
+            chance_to_summon = max(1-(kore_left>100)*0.1-math.sqrt(kore_left)*0.01- (nb_ships < 29)*0.3,0)
             if random.random()<chance_to_summon:
-                if nb_ships >= 29: #+ 21*(1-no_endangered):
+                if nb_ships >= 8 + 21*(1-no_endangered):
                     plan = compose(best_fleet_overall(boards,shipyard.id))
                     if plan != "":
                         action = ShipyardAction.launch_fleet_with_flight_plan(8, plan)
@@ -884,9 +937,10 @@ def agent(obs: Observation, config: Configuration):
 
 
 
-from kaggle_environments import make
+if __name__ == "__main__":
+    from kaggle_environments import make
 
-env = make("kore_fleets", debug=True)
-print(env.name, env.version)
+    env = make("kore_fleets", debug=True)
+    print(env.name, env.version)
 
-env.run([agent,balanced_agent])
+    env.run([agent,balanced_agent])

@@ -5,3 +5,5 @@ src/__pycache__
 src/Best_agent_from_beta/__pycache__
 
 .env
+
+docs/.obsidian

@@ -1,21 +1,27 @@
+from distutils.command.config import LANG_EXT
 from hashlib import new
+from re import M
+from ssl import OP_NO_SSLv2
 from xmlrpc.client import Boolean
 from kore_fleets import balanced_agent, random_agent
 from logger import logger, init_logger
 from helpers import *
 from helpers import Observation, Point, Direction, ShipyardAction, Configuration, Player, Shipyard, ShipyardId, Board, Fleet
-from random import gauss, randint
+import random
 import math
 import time
 from copy import deepcopy
 from typing import List, Dict, Tuple, Union
+import matplotlib.pyplot as plt
 
+external_timer = time.time()
 
 class Timer:
     def __init__(self, func):
         self.function = func
         self.inc = 0
         self.timer = 0
+        self.a_print = False
 
     def __call__(self, *args, **kwargs):
         start_time = time.time()
@@ -23,11 +29,20 @@ class Timer:
         end_time = time.time()
         self.inc += 1
         self.timer += end_time-start_time
+        """
         if self.inc == 10000:
             print("10000 Executions of {} took {} seconds".format(self.function.__name__,self.timer))
             self.inc = 0
             self.timer = 0
-        
+        """
+        if 40 <= int(external_timer-time.time())%50:
+            self.a_print = True
+
+        if self.a_print == True and int(external_timer-time.time())%50<10:
+            if self.timer > 0.0001:
+                print(f"Purcentage of use of {self.function.__name__} : {self.timer:.3g} %")
+            self.a_print = False
+            self.timer = 0
         return result
 
 class Index():
@@ -179,6 +194,7 @@ def reward_fleet(board: Board, shipyard_id : int, duration : int, action_plan : 
     next_pos = next_n_positions(pseudo_fleet,size,duration)
     return fast_kore_calcul(next_pos, board)
 
+@Timer
 def translate_n(p : Point, dir: Direction, times: int, size: int) -> Point:
     if times > 0:
         new_p = p
@@ -347,7 +363,7 @@ def plan_route_home_21(me : Player, boards : List[Board], fleet: Fleet, shipyard
         
 
 
-def predicts_next_boards(obs,config,n=23,my_first_acctions=None,my_agent=balanced_agent,op_agent=balanced_agent):
+def predicts_next_boards(obs,config,n=40,my_first_acctions=None,my_agent=balanced_agent,op_agent=balanced_agent):
     board = Board(obs, config)
     me = board.current_player
     new_observation = deepcopy(obs)
@@ -383,6 +399,9 @@ def decompose(fligtPlan : str) -> List[Union[str,int]]:
             res.append(x)
         else:
             suite = suite + x
+    if suite != "":
+        if suite != "0":
+            res.append(int(suite))
     return res
 
 def compose(plan :List[Union[str,int]]) -> str:
@@ -395,7 +414,7 @@ def maximum_flight_plan_length(num_ships):
     return math.floor(2 * math.log(num_ships)) + 1
 
 def minimum_ships_num(length_fligth_plan):
-    dict_relation = {1:1,2:2,3:3,4:5,6:13,7:21,8:34,9:55,10:91,11:149,12:245,13:404}
+    dict_relation = {1:1,2:2,3:3,4:5,5:8,6:13,7:21,8:34,9:55,10:91,11:149,12:245,13:404}
     if 0<length_fligth_plan<14:
         return dict_relation[length_fligth_plan]
     return 10000
@@ -446,6 +465,7 @@ class Pseudo_Fleet:
         self.position = position
 
 
+@Timer
 def next_n_positions(fleet: Union[Fleet,Pseudo_Fleet], size: int, n: int) -> List[Point]:
     plan = decompose(fleet.flight_plan)
     dir = fleet.direction
@@ -484,6 +504,7 @@ def add_to_all(liste: List[List],item) -> List[List]:
 
 # 0. ------- Generate all paths
 
+@Timer
 def generate_all_looped_plans(nb_move : int, plan: List[List[Union[str,int]]]=[[]], last_dir : Union[str,None]=None, last_move : Boolean=True) -> List[List[Union[str,int]]]:
     current_dir : Direction
     if nb_move == 0:
@@ -551,6 +572,7 @@ def fast_kore_calcul(next_pos: List[Point],board : Board):
     return tot_kore
 
 
+@Timer
 def fast_precise_kore_calcul(next_pos: List[Point],boards : List[Board]):
     tot_kore = 0
     for i in range(0,len(next_pos)-1):
@@ -565,6 +587,7 @@ def fast_precise_kore_calcul(next_pos: List[Point],boards : List[Board]):
 # 2. --------- Danger level
 
 
+@Timer
 def danger_level(boards : List[Board], next_pos: List[Point], nb_ship : int):
     res = 0
     board = boards[0]
@@ -588,6 +611,7 @@ def danger_level(boards : List[Board], next_pos: List[Point], nb_ship : int):
 # 4. Easy to retrieve ?
 
 
+@Timer
 def retrieve_cost(boards : List[Board], next_pos: List[Point], nb_ship: int):
     me = boards[0].current_player
     size = boards[0].configuration.size
@@ -611,6 +635,7 @@ def retrieve_cost(boards : List[Board], next_pos: List[Point], nb_ship: int):
 # 3. --------- Length
 
 
+@Timer
 def duration_till_stop(boards : List[Board], next_pos: List[Point],nb_ship: int):
     me = boards[0].current_player
     size = boards[0].configuration.size
@@ -648,6 +673,7 @@ def duration_till_stop(boards : List[Board], next_pos: List[Point],nb_ship: int)
 
 # ------------------- Global result
 
+@Timer
 def evaluate_plan(boards: List[Board],plan:List[Union[Direction,int]],pos,nb_ships,spawn_cost,size):
     action_plan = compose(plan)
     pseudo_fleet = Pseudo_Fleet(action_plan,None,pos)
@@ -660,6 +686,7 @@ def evaluate_plan(boards: List[Board],plan:List[Union[Direction,int]],pos,nb_shi
     danger = danger_level(boards,next_pos,nb_ships)
     return kore-danger*danger*500-retrieve_costs*spawn_cost*0.2-real_duration-(nb_ships_left<=0)*10000,real_duration,nb_ships_left
 
+@Timer
 def best_fleet_overall(boards : List[Board], shipyard_id : ShipyardId):
     board = boards[0]
     size = board.configuration.size
@@ -795,10 +822,347 @@ def best_pos_shipyard(boards: List[Board], shipyard_id: ShipyardId) -> Union[Poi
                             best_kore = potential_kore
                             best_pos = possible_pos
     return best_pos
+
+class Slice:
+    def __init__(self, board: Board) -> None:
+        self.gravity : Dict[Point,float]
+        self.gravity = dict()
+        self.anti_gravity : Dict[Point,float]
+        self.anti_gravity = dict()
+        self.board = board
+        
+    def add_gravity(self: 'Slice', position: Point, val: float) -> None:
+        if position in self.gravity:
+            self.gravity[position] += val
+        else:
+            self.gravity[position] = val
+
+    def add_anti_gravity(self: 'Slice', position: Point, val : int) -> None:
+        if position in self.anti_gravity:
+            self.gravity[position] += val
+        else:
+            self.gravity[position] = val
+        
+    def get_gravity_at_point(self: 'Slice', position: Point) -> float:
+        if position in self.gravity:
+            return self.gravity[position]
+        else:
+            return 0
     
+    def get_cell_at_point(self, position: Point):
+        return self.board.get_cell_at_point(position)
+    
+    def get_fleet_at_point(self,position : Point):
+        return self.board.get_fleet_at_point(position)
+    
+    def get_shipyard_at_point(self, position: Point):
+        return self.board.get_shipyard_at_point(position)
+    
+    def get_kore_at_point(self,position: Point):
+        cell = self.get_cell_at_point(position)
+        if cell == None:
+            return 0
+        else:
+            return cell.kore
+class Point4d:
+    def __init__(self,point: Point, t : int, d: Union[Direction,None]) -> None:
+        self._point = point
+        self._t = t
+        self._d = d
+    
+    @property
+    def point(self):
+        return self._point
+    
+    @property
+    def t(self):
+        return self._t
+    
+    @property
+    def d(self):
+        return self._d
+    
+    def move(self,d: Direction,size: int) -> 'Point4d':
+        new_point = self._point.translate(d.to_point(),size)
+        return Point4d(new_point,self._t+1,d)
+    
+        
     
 
-def agent(obs: Observation, config: Configuration):
+
+class Space:
+    def __init__(self,boards: List[Board]) -> None:
+        self.space : List[Slice]
+        self.space = []
+        for i in range(len(boards)):
+            self.space.append(Slice(boards[i]))
+    
+    def __get__(self) -> List[Slice]:
+        return self.space
+    
+    def __len__(self) -> int:
+        return len(self.space)
+
+    def __getitem__(self, ii) -> Union[List[Slice],Slice]:
+        """Get a list item"""
+        if isinstance(ii, slice):
+            return self.__class__(self.space[ii])
+        else:
+            return self.space[ii]
+
+    def __delitem__(self, ii):
+        """Delete an item"""
+        del self.space[ii]
+
+    def __setitem__(self, ii, val):
+        # optional: self._acl_check(val)
+        self._list[ii] = val
+
+    def __str__(self):
+        return str(self.space)
+
+    def insert(self, ii, val):
+        # optional: self._acl_check(val)
+        self.space.insert(ii, val)
+
+    def append(self, val):
+        self.insert(len(self._list), val)
+    def get_cell_at_point(self, point4d: Point4d):
+        return self.space[point4d.t].get_cell_at_point(point4d.point)
+    
+    def get_fleet_at_point(self,point4d: Point4d):
+        return self.space[point4d.t].get_fleet_at_point(point4d.point)
+
+    def get_shipyard_at_point(self, point4d: Point4d):
+        return self.space[point4d.t].get_shipyard_at_point(point4d.point)
+    
+    def get_kore_at_point(self, point4d: Point4d):
+        return self.space[point4d.t].get_kore_at_point(point4d.point)
+    
+    def get_gravity_at_point(self,point4d: Point4d):
+        return self.space[point4d.t].get_gravity_at_point(point4d.point)
+
+    def add_gravity(self,point4d: Point4d, val: float):
+        return self.space[point4d.t].add_gravity(point4d.point, val)
+    
+    def show_gravity(self,size):
+        res1 = [[0 for _ in range(size)] for _ in range(size)]
+        res2 = [[0 for _ in range(size)] for _ in range(size)]
+        for i in range(size):
+            for j in range(size):
+                pos = Point(j, size - 1 - i)
+                point = Point4d(pos,0,None)
+                res1[i][j] = self.get_gravity_at_point(point)
+                res2[i][j] = self.get_kore_at_point(point)
+        plt.matshow(res1)
+        plt.matshow(res2)
+        plt.show()
+                
+
+
+@Timer
+def ApplyGravitySlow(space: Space):
+    # --- first anti gravity with shipyards
+    """
+    for t in range(1,len(space)):
+        slice = space[t]
+        ops = slice.opponents
+        ops_shipyards = []
+        for op in ops:
+            for op_shipyard in op.shipyards:
+                for mt in range(t-1,-1,-1):
+                    mslice = space[mt]
+    """
+    size = space[0].board.configuration.size
+    for t in range(len(space)-1,0,-1):
+        for i in range(size):
+            for j in range(size):
+                pos = Point(j, size - 1 - i)
+                curr_kore = space.get_kore_at_point(Point4d(pos,t,None))
+                if curr_kore > 10:
+                    for nt in range(t-1,-1,-1):
+                        curr_kore = curr_kore/2
+                        if curr_kore > 1:
+                            for l in range(4):
+                                d = Direction.from_index(l)
+                                dp = d.rotate_left()
+                                for k in range(t-nt):
+                                    new_pos = translate_n_m(pos,d,k,dp,t-nt-k,size)
+                                    space.add_gravity(Point4d(new_pos,t-k-1,None),curr_kore)
+
+
+def ApplyGravity(space: Space):
+    size = space[0].board.configuration.size
+    filter = [[-0.37,-0.32,1.5,-0.32,-0.37],
+              [-0.32,-0.45,2.1,-0.45,-0.32],
+              [1.5,2.1,-0.75,2.1,1.5],
+              [-0.32,-0.45,2.1,-0.45,-0.32],
+              [-0.37,-0.3,1.5,-0.32,-0.37]]
+    for n in range(len(space)-1,-1,-1):
+        for i in range(size):
+            for j in range(size):
+                sum = 0
+                for k in range(len(filter)):
+                    for l in range(len(filter[0])):
+                        t = n+abs(-k+len(filter)//2)+abs(-l+len(filter)//2)
+                        if t>len(space)-1:
+                            t = len(space)-1
+                        x = (i-k+len(filter)//2)%size
+                        y = (j-l+len(filter[0])//2)%size
+                        sum += space.get_gravity_at_point(Point4d(Point(x,y),t,None))*filter[k][l]
+                space.add_gravity(Point4d(Point(i,j),n,None),(sum + space.get_kore_at_point(Point4d(Point(i,j),n,None))*7.2)/10)
+    #space.show_gravity(size)
+
+def value(elmt):
+    (r,lr,p,cs,ms,Ms,ln,tplan) = elmt
+    plan,lmoves = tplan
+    return r+lr-7*ms-10*ln-ln*ln*0.2-5*(ms-cs)
+
+def sortedAppend(liste, element):
+    liste.append(element)
+    i = len(liste)-1
+    while i > 0 and value(liste[i]) < value(liste[i-1]):
+        liste[i], liste[i-1] = liste[i-1], liste[i]
+        i -= 1
+
+def update_tplan(tplan: Tuple[str,int],dir: Direction)->Tuple[str,int]:
+    plan, lmoves = tplan
+    dec_plan = decompose(plan)
+    if plan == "":
+        return (dir.to_char(),0)
+    if lmoves > 0:
+        pre_dir = dec_plan[-1]
+        if dir.to_char() == pre_dir:
+            return (compose(dec_plan),lmoves+1)
+        else:
+            dec_plan.append(str(lmoves))
+            dec_plan.append(dir.to_char())
+            return (compose(dec_plan),0)
+    else:
+        pre_dir = dec_plan[-1]
+        if dir.to_char() == pre_dir:
+            return (compose(dec_plan),1)
+        else:
+            dec_plan.append(dir.to_char())
+            return (compose(dec_plan),0)
+
+def astar3d(boards: List[Board])->Tuple[str,int]:
+    board = boards[0]
+    size = board.configuration.size
+    space = Space(boards)
+    ApplyGravity(space)
+    logger.info("gravity added")
+    me = board.current_player
+    my_shipyards = me.shipyards
+    """
+    ops = board.opponents
+    ops_shipyards = []
+    for op in ops:
+        for op_shipyard in op.shipyards:
+            ops_shipyards.append(op_shipyard)
+    """
+    priority_list = []
+    for shipyard in my_shipyards:
+        if shipyard.ship_count >= 2:
+            point = Point4d(shipyard.position,0,None)
+            priority_list = [(0,space.get_gravity_at_point(point),point,2,2,shipyard.ship_count,0,("",0))]# [(reward,local_reward,point4d,nb_current_ships,nb_ships_min_needed,nb_ships_max_possible,nb_steps,tplan)]
+    best_plan : List[Tuple[float,str,int]]
+    best_plan = []
+    while priority_list != [] and len(best_plan) < 5:
+        (r,lr,p,cs,ms,Ms,ln,tplan) = priority_list.pop()
+        ps = ms-cs # number of lost ships
+        plan,lmoves = tplan
+        #logger.info(f"plan : {plan+str(lmoves)}, value : {value((r,lr,p,cs,ms,Ms,ln,tplan))}")
+        nshipyard = space.get_shipyard_at_point(p)
+        nfleet = space.get_fleet_at_point(p)
+        if nshipyard != None and plan != "":
+            if nshipyard.player_id == me.id:
+                if plan not in ["NS","EW","WE","SN"]:
+                    best_plan.append((value((r,0,p,cs,ms,Ms,ln,tplan)),plan,ms))
+                continue
+            else:
+                if nshipyard.ship_count >= Ms-ps:
+                    continue
+                if nshipyard.ship_count >= cs:
+                    diff = nshipyard.ship_count + 1-cs
+                    cs = 1
+                    ms = ms + diff
+                    best_plan.append((value((r,0,p,cs,ms,Ms,ln,tplan)),plan,ms))
+        if nfleet != None:
+            if nfleet.player_id != me.id:
+                best_plan.append((value((r,0,p,cs,ms,Ms,ln,tplan)),plan,ms))
+            else:
+                if lr == 0:
+                    best_plan.append((value((r,0,p,cs,ms,Ms,ln,tplan)),plan,ms))
+                
+        max_move = maximum_flight_plan_length(Ms)
+        if ln >= len(space)-1:
+            continue
+        for i in range(4):
+            new_direction = Direction.from_index(i)
+            (new_plan,new_lmoves) = update_tplan(tplan,new_direction)
+            if len(new_plan)>=max_move:
+                continue
+            if len(new_plan) > len(plan):
+                if minimum_ships_num(len(new_plan))>ms:
+                    diff = minimum_ships_num(len(new_plan))-ms
+                    ms = ms + diff
+                    cs = cs + diff
+            new_p = p.move(new_direction,size)
+            kore = space.get_kore_at_point(new_p)
+            fleet = space.get_fleet_at_point(new_p)
+            gravity = space.get_gravity_at_point(new_p)
+            fleet_kore = 0
+            if fleet != None:
+                if fleet.player_id != me.id:
+                    if fleet.ship_count >= Ms-ps:
+                        continue
+                    if fleet.ship_count >= cs:
+                        diff = fleet.ship_count + 1-cs
+                        cs = 1
+                        ms = ms + diff
+                    fleet_kore = fleet.kore
+                else:
+                    if fleet.ship_count < Ms-ps:
+                        if endangered(boards[ln:],fleet):
+                            fleet_kore = fleet.kore
+                            if fleet.ship_count >= cs:
+                                diff = fleet.ship_count + 1 - cs
+                                cs = 1
+                                ms = ms + diff
+                    elif fleet.ship_count > cs:
+                        gravity = 0
+                    else:
+                        cs += fleet.ship_count
+            nshipyard = space.get_shipyard_at_point(new_p)
+            if nshipyard != None:
+                if nshipyard.player_id != me.id:
+                    if nshipyard.ship_count >= Ms-ps:
+                        continue
+                    if nshipyard.ship_count >= cs:
+                        diff = nshipyard.ship_count + 1-cs
+                        cs = 1
+                        ms = ms + diff
+                        fleet_kore = 50
+                        gravity = 0
+                        
+            
+            if ms > Ms:
+                continue
+            new_elmt = (r+kore+fleet_kore,gravity,new_p,cs,ms,Ms,ln+1,(new_plan,new_lmoves))
+            if value(new_elmt) < 0:
+                continue
+            sortedAppend(priority_list,new_elmt)
+            
+    logger.info(f"{best_plan}")
+    if best_plan == []:
+        return ("",0)
+    best = max(best_plan)
+    if best[0]>0:
+        return (best[1],best[2])
+    return ("",0)
+
+def agent2(obs: Observation, config: Configuration):
     new_observation : Observation
     if obs.step == 0:
         init_logger(logger)
@@ -819,6 +1183,7 @@ def agent(obs: Observation, config: Configuration):
     boards = predicts_next_boards(obs,config)
     logger.info("boards generated")
     # --------------------------------- Choose a move ---------------------------------
+
     
     #i_shipyards,ship_power = indanger_shipyards(boards,)
     
@@ -935,12 +1300,44 @@ def agent(obs: Observation, config: Configuration):
     logger.info(me.next_actions)
     return me.next_actions
 
+def agent(obs: Observation, config: Configuration):
+    new_observation : Observation
+    if obs.step == 0:
+        init_logger(logger)
 
-
+    board = Board(obs, config)
+    step = board.step
+    my_id = obs["player"]
+    remaining_time = obs["remainingOverageTime"]
+    logger.info(f"<step_{step + 1}>, remaining_time={remaining_time:.1f}")
+    me = board.current_player
+    turn = board.step
+    spawn_cost = board.configuration.spawn_cost
+    kore_left = me.kore
+    ops = board.opponents
+    size = board.configuration.size
+    
+    # --------------------------------- Predict the next Boards ---------------------------------
+    boards = predicts_next_boards(obs,config)
+    logger.info("boards generated")
+    # --------------------------------- Choose a move ---------------------------------
+    
+    shipyards = me.shipyards
+    action = None
+    plan,nb_ships_to_send = astar3d(boards)
+    if plan != "":
+        action = ShipyardAction.launch_fleet_with_flight_plan(nb_ships_to_send, plan)
+    if action == None:
+        if kore_left >= spawn_cost:
+            action = ShipyardAction.spawn_ships(int(min(shipyards[-1].max_spawn,kore_left/spawn_cost)))
+    shipyards[-1].next_action = action
+    logger.info(me.next_actions)
+    return me.next_actions
+    
 if __name__ == "__main__":
     from kaggle_environments import make
 
     env = make("kore_fleets", debug=True)
     print(env.name, env.version)
 
-    env.run([agent,balanced_agent])
+    env.run([agent])

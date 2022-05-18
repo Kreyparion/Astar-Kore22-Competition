@@ -3,7 +3,8 @@ import logging
 
 FILE = "./game.log"
 IS_KAGGLE = os.path.exists("/kaggle_simulations")
-LEVEL = logging.DEBUG if not IS_KAGGLE else logging.INFO
+#LEVEL = logging.DEBUG if not IS_KAGGLE else logging.INFO
+LEVEL = logging.INFO
 LOGGING_ENABLED = True
 
 

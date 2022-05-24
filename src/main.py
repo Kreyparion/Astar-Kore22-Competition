@@ -1,3 +1,4 @@
+from turtle import pos
 from xmlrpc.client import Boolean
 from kore_fleets import balanced_agent, random_agent, do_nothing_agent
 from logger import logger, init_logger
@@ -299,6 +300,7 @@ def spawn_agent(obs: Observation,config: Configuration):
         shipyard.next_action = action
     return me.next_actions
 
+@Timer
 def predicts_next_boards(obs,config,n=40,my_first_acctions=None,my_agent=spawn_agent,op_agent=spawn_agent):
     board = Board(obs, config)
     me = board.current_player
@@ -703,20 +705,32 @@ class Slice:
         self.danger_zone = dict()
         self.board = board
         self.me = board.current_player
+        self.size = board.configuration.size
         self.avg_gravity = 0
         self.kore: Dict[Point,float]
         self.kore = dict()
+        self.kore2: List[List[float]]
+        self.kore2 = [[0 for x in range(self.size)] for y in range(self.size)]
+        self.gravity2: List[List[float]]
+        self.gravity2 = [[0 for x in range(self.size)] for y in range(self.size)]
         
-        
+
     def add_gravity(self: 'Slice', position: Point, val: float) -> None:
         if position in self.gravity:
             self.gravity[position] += val
         else:
             self.gravity[position] = val
+
+    def add_gravity2(self: 'Slice', position: Point, val: float) -> None:
+        self.gravity2[position.x][position.y] += val
     
+
     def multiply_gravity(self: 'Slice', position: Point, val: float) -> None:
         if position in self.gravity:
             self.gravity[position] *= val
+
+    def multiply_gravity2(self: 'Slice', position: Point, val: float) -> None:
+        self.gravity2[position.x][position.y] *= val
 
     def add_danger_level_at_point(self: 'Slice', position: Point, val : int) -> None:
         if position in self.danger_zone:
@@ -734,6 +748,9 @@ class Slice:
             return self.gravity[position]
         else:
             return 0
+    
+    def get_gravity2_at_point(self: 'Slice', position: Point) -> float:
+        return self.gravity2[position.x][position.y]
     
     def get_danger_level_at_point(self: 'Slice', position: Point) -> int:
         if position in self.danger_zone:
@@ -781,6 +798,12 @@ class Slice:
         else:
             return 0
     
+    def set_kore2_at_point(self,position: Point,kore: float):
+        self.kore2[position.x][position.y] = kore
+    
+    def get_kore2_at_point(self,position: Point):
+        return self.kore2[position.x][position.y]
+    
     def calculate_avg_gravity(self,size):
         tot_sum = 0
         for i in range(size):
@@ -788,6 +811,8 @@ class Slice:
                 pos = Point(i,j)
                 tot_sum += self.get_gravity_at_point(pos)
         self.avg_gravity = tot_sum / (size*size)
+    
+
 
 class Point4d:
     def __init__(self,point: Point, t : int, d: Union[Direction,None]) -> None:
@@ -918,6 +943,12 @@ class Space:
     def set_kore_at_point(self, point4d: Point4d,kore: float):
         return self.space[point4d.t].set_kore_at_point(point4d.point,kore)
     
+    def get_kore2_at_point(self, point4d: Point4d):
+        return self.space[point4d.t].get_kore2_at_point(point4d.point)
+    
+    def set_kore2_at_point(self, point4d: Point4d,kore: float):
+        return self.space[point4d.t].set_kore2_at_point(point4d.point,kore)
+    
     def get_potential_at_point(self, point4d: Point4d):
         return self.space[point4d.t].get_potential_at_point(point4d.point)
     
@@ -929,6 +960,15 @@ class Space:
     
     def multiply_gravity(self,point4d: Point4d, val: float):
         return self.space[point4d.t].multiply_gravity(point4d.point, val)
+    
+    def get_gravity2_at_point(self,point4d: Point4d):
+        return self.space[point4d.t].get_gravity2_at_point(point4d.point)
+
+    def add_gravity2(self,point4d: Point4d, val: float):
+        return self.space[point4d.t].add_gravity2(point4d.point, val)
+    
+    def multiply_gravity2(self,point4d: Point4d, val: float):
+        return self.space[point4d.t].multiply_gravity2(point4d.point, val)
     
     def calculate_avg_gravity(self,size):
         for i in range(len(self.space)):
@@ -942,8 +982,8 @@ class Space:
             for j in range(size):
                 pos = Point(size - 1 - j, i)
                 point = Point4d(pos,0,None)
-                res1[i][j] = self.get_gravity_at_point(point)
-                res2[i][j] = self.get_kore_at_point(point)
+                res1[i][j] = self.get_gravity2_at_point(point)
+                res2[i][j] = self.get_kore2_at_point(point)
         plt.matshow(res1)
         plt.matshow(res2)
         plt.show()
@@ -1021,7 +1061,7 @@ class Space:
                         if fleet != None and fleet.player_id != player_ID and fleet.ship_count >= nb_ships_left:
                             return
 
-                    new_kore = ghost_fleet.kore + self.get_kore_at_point(pos)*ratio_kore_ship_count(nb_ships_left)
+                    new_kore = ghost_fleet.kore + self.get_kore2_at_point(pos)*ratio_kore_ship_count(nb_ships_left)
                     ghost_fleet = Fleet(FleetId("ghost"),nb_ships_left,pos.d,pos.point,new_kore,plan,player_ID,self.space[pos.t].board)
                     self.ghost_fleets[pos] = ghost_fleet
 
@@ -1105,17 +1145,17 @@ def ApplyGravity(space: Space):
         for op in nops:
             for fleet in op.fleets:
                 pos = Point4d(fleet.position,n,None)
-                space.add_gravity(pos,reward_for_taking_an_ennemy_fleet(fleet.kore,fleet.ship_count))
+                space.add_gravity2(pos,reward_for_taking_an_ennemy_fleet(fleet.kore,fleet.ship_count))
                 for i in range(4):
                     d = Direction.from_index(i)
                     posi = pos.translate(d,size)
-                    space.add_gravity(posi,reward_for_taking_a_side_ennemy_fleet(fleet.kore,fleet.ship_count))
+                    space.add_gravity2(posi,reward_for_taking_a_side_ennemy_fleet(fleet.kore,fleet.ship_count))
             #for shipyard in op.shipyards:
             #    space.add_gravity(Point4d(shipyard.position,n,None),reward_for_taking_a_shipyard(shipyard.max_spawn))
         for i in range(size):
             for j in range(size):
                 point = Point4d(Point(i,j),n,None)
-                space.add_gravity(point,space.get_kore_at_point(point))
+                space.add_gravity2(point,space.get_kore2_at_point(point))
     
     for n in range(len(space)-1,-1,-1):
         for i in range(size):
@@ -1128,14 +1168,14 @@ def ApplyGravity(space: Space):
                             t = len(space)-1
                         x = (i-k+len(filter)//2)%size
                         y = (j-l+len(filter[0])//2)%size
-                        sum += space.get_gravity_at_point(Point4d(Point(x,y),t,None))*filter[k][l]
+                        sum += space.get_gravity2_at_point(Point4d(Point(x,y),t,None))*filter[k][l]
                 point = Point4d(Point(i,j),n,None)
-                space.add_gravity(point,(sum + space.get_kore_at_point(point))/10)
+                space.add_gravity2(point,(sum + space.get_kore2_at_point(point))/10)
     
     for n in range(len(space)-1,-1,-1):
         for i in range(size):
             for j in range(size):
-                space.multiply_gravity(Point4d(Point(i,j),n,None),myY[n]*ratio)
+                space.multiply_gravity2(Point4d(Point(i,j),n,None),myY[n]*ratio)
 
 
     # space.show_gravity(size)
@@ -1167,21 +1207,22 @@ def Normalize(space : Space, size: int):
         v = sum([sum([(space.get_potential_at_point(Point4d(Point(x,y),i,None))-avg)**2 for x in range(size)]) for y in range(size)])/(size*size)
         for x in range(size):
             for y in range(size):
-                space.set_kore_at_point(Point4d(Point(x,y),i,None),space.get_potential_at_point(Point4d(Point(x,y),i,None)) / math.sqrt(v))
+                space.set_kore2_at_point(Point4d(Point(x,y),i,None),space.get_potential_at_point(Point4d(Point(x,y),i,None)) / math.sqrt(v))
 
 # ------------ Arbitrary values to that impacts the Astar search
 def value(elmt):
     (r,ar,tr,p,cs,ms,Ms,ln,tplan) = elmt
     plan,lmoves = tplan
-    ratio = ratio_kore_ship_count(ms)
+    avg_ratio = ratio_kore_ship_count(ms)
+    curr_ratio = ratio_kore_ship_count(cs)
     # print(plan+str(lmoves),r*ratio,ar,tr)
-    return r*ratio+ar+tr-0.05*ln
+    return r*avg_ratio*3+tr+ar-0.06*ln-0.003*ln*ln-ln*ms*0.00003
 
 def exploration_cut(ln):
-    return -1#-5+ln+ln*ln*0.1
+    return 0#-5+ln+ln*ln*0.1
 
 def bonus_on_highway(ln):
-    return 1.2#5+ln-ln*ln*0.1
+    return 1.5#5+ln-ln*ln*0.1
 
 def reward_for_taking_a_shipyard(max_spawn):
     return 5*max_spawn*max_spawn+150
@@ -1196,7 +1237,7 @@ def reward_for_taking_an_ally_fleet(kore,ship_count): # not endangered
     return 0
 
 def malus_for_max_spawn(max_spawn):
-    return 0# 15-max_spawn*max_spawn*0.8
+    return -max_spawn*max_spawn*0.01# 15-max_spawn*max_spawn*0.8
 
 def minimum_ships_for_this_state(kore,max_spawn):
     ms = 2
@@ -1323,7 +1364,7 @@ def astar3d(space: Space, shipyard: Shipyard, incoming_attacks :List[Tuple[int,i
     priority_list = []
     if shipyard.ship_count >= ms:
         point = Point4d(shipyard.position,0,None)
-        priority_list = [(0,0,space.get_gravity_at_point(point)+bonus_on_highway(0),point,ms,ms,shipyard.ship_count,0,("",0))]# [(reward,local_reward,point4d,nb_current_ships,nb_ships_min_needed,nb_ships_max_possible,nb_steps,tplan)]
+        priority_list = [(0,0,space.get_gravity2_at_point(point)+bonus_on_highway(0),point,ms,ms,shipyard.ship_count,0,("",0))]# [(reward,local_reward,point4d,nb_current_ships,nb_ships_min_needed,nb_ships_max_possible,nb_steps,tplan)]
     best_plan : List[Tuple[float,str,int]] # kore_number,plan,minimum_ships
     best_plan = []
     nb_iter = 0
@@ -1344,17 +1385,19 @@ def astar3d(space: Space, shipyard: Shipyard, incoming_attacks :List[Tuple[int,i
 
         max_move = maximum_flight_plan_length(Ms)
         plan,lmoves = tplan
-        # logger.info(f"plan : {plan+str(lmoves)}, value : {value((r,ar,tr,p,cs,ms,Ms,ln,tplan))}")
+        # logger.info(f"plan : {plan+str(lmoves)}, value : {value((r,ar,tr,p,cs,ms,Ms,ln,tplan))}, detail: r{r}, ar{ar}, tr{tr},ln{ln}")
         
         # -------------------- Checked if arrived at a destination ----------------
         # We do it here because it means that it had a high value
         
         # ------ Check if arrived to an Highway
+        """
         exit_highway = space.is_highway(p.point)
         if exit_highway != None:
             (direction,distance_to_shipyard,max_spawn) = exit_highway
             if plan != "":
                 if plan[-1] == direction.to_char():
+                    print(distance_to_shipyard)
                     np = p.move_n_times(direction,size,distance_to_shipyard)
                     if np.t > len(space)-1:
                         np = Point4d(np.point,len(space)-1,np.d)
@@ -1362,6 +1405,10 @@ def astar3d(space: Space, shipyard: Shipyard, incoming_attacks :List[Tuple[int,i
                     logger.info(f"to highway : {plan}")
                     best_plan.append((value((r,ar,malus_for_max_spawn(max_spawn),p,cs,ms,Ms,ln,(plan,lmoves))),plan,ms))
                     continue
+        """
+        if ln > len(space)-1:
+            logger.info(f"to unknown shipyard : {plan}")
+            best_plan.append((value((r,ar,malus_for_max_spawn(0),p,cs,ms,Ms,ln,tplan)),plan,ms))
         
         # ------ check if arrived to a shipyard
         nshipyard = space.get_shipyard_at_point(p)
@@ -1410,8 +1457,8 @@ def astar3d(space: Space, shipyard: Shipyard, incoming_attacks :List[Tuple[int,i
                     cs = cs + diff
             
             new_p = p.move(new_direction,size)
-            kore = space.get_kore_at_point(new_p)
-            gravity = space.get_gravity_at_point(new_p)
+            kore = space.get_kore2_at_point(new_p)
+            gravity = space.get_gravity2_at_point(new_p)
             
             
             # ----- Check if collide with another fleet
@@ -1425,14 +1472,14 @@ def astar3d(space: Space, shipyard: Shipyard, incoming_attacks :List[Tuple[int,i
                         diff = fleet.ship_count + 1-cs
                         cs = 1
                         ms = ms + diff
-                    fleet_kore += reward_for_taking_an_ally_fleet(fleet.kore,fleet.ship_count)
+                    # fleet_kore += reward_for_taking_an_ennemy_fleet(fleet.kore,fleet.ship_count)
                 else:
                     max_capacity_fleet = where_to_capacity(space,ln,fleet)
                     #if max_capacity_fleet != -1 and max_capacity_fleet != 0 and max_capacity_fleet != 100000:
                     #    logger.info(f"{max_capacity_fleet}")
                     if max_capacity_fleet == -1:
                         if fleet.ship_count < Ms+cs-ms:    # Get the fleet
-                            fleet_kore += reward_for_taking_an_ennemy_fleet(fleet.kore,fleet.ship_count)
+                            # fleet_kore += reward_for_taking_an_ally_fleet(fleet.kore,fleet.ship_count)
                             if fleet.ship_count >= cs:
                                 diff = fleet.ship_count + 1 - cs
                                 cs = 1
@@ -1460,7 +1507,7 @@ def astar3d(space: Space, shipyard: Shipyard, incoming_attacks :List[Tuple[int,i
                             diff = fleetj.ship_count + 1-cs
                             cs = 1
                             ms = ms + diff
-                        fleet_kore += reward_for_taking_a_side_ennemy_fleet(fleetj.kore,fleetj.ship_count)
+                        # fleet_kore += reward_for_taking_a_side_ennemy_fleet(fleetj.kore,fleetj.ship_count)
 
             # -------- Check if collide with a shipyard
             nshipyard = space.get_shipyard_at_point(new_p)
@@ -1472,7 +1519,11 @@ def astar3d(space: Space, shipyard: Shipyard, incoming_attacks :List[Tuple[int,i
                         diff = nshipyard.ship_count + 1-cs
                         cs = 1
                         ms = ms + diff
-                        fleet_kore += reward_for_taking_a_shipyard(nshipyard.max_spawn)
+                        # fleet_kore += reward_for_taking_a_shipyard(nshipyard.max_spawn)
+                        gravity = 0
+                    else:
+                        cs = cs - nshipyard.ship_count
+                        # fleet_kore += reward_for_taking_a_shipyard(nshipyard.max_spawn)
                         gravity = 0
                 else:
                     gravity = malus_for_max_spawn(shipyard.max_spawn)
@@ -1483,14 +1534,14 @@ def astar3d(space: Space, shipyard: Shipyard, incoming_attacks :List[Tuple[int,i
                 (direction,distance_to_shipyard,max_spawn) = exit_highway
                 if new_plan != "":
                     if new_direction == direction:
-                        np = p.move_n_times(direction,size,distance_to_shipyard)
+                        np = new_p.move_n_times(direction,size,distance_to_shipyard)
                         if np.t > len(space) - 1:
                             np = Point4d(np.point,len(space)-1,np.d)
                         nshipyard = space.get_shipyard_at_point(np)
                         if nshipyard != None:
                             if nshipyard.player_id == me.id:
                                 gravity = malus_for_max_spawn(max_spawn)
-                                ln = ln+distance_to_shipyard
+                                ln = ln+distance_to_shipyard-1
                                 new_lmoves = new_lmoves+distance_to_shipyard
                             else:
                                 if nshipyard.ship_count >= Ms+cs-ms:
@@ -1499,10 +1550,17 @@ def astar3d(space: Space, shipyard: Shipyard, incoming_attacks :List[Tuple[int,i
                                     diff = nshipyard.ship_count + 1-cs
                                     cs = 1
                                     ms = ms + diff
-                                    fleet_kore += reward_for_taking_a_shipyard(nshipyard.max_spawn)
-                                    ln = ln+distance_to_shipyard
+                                    # fleet_kore += reward_for_taking_a_shipyard(nshipyard.max_spawn)
+                                    ln = ln+distance_to_shipyard-1
                                     new_lmoves = new_lmoves+distance_to_shipyard
                                     gravity = 0
+                                else:
+                                    cs -= nshipyard.ship_count
+                                    # fleet_kore += reward_for_taking_a_shipyard(nshipyard.max_spawn)
+                                    ln = ln+distance_to_shipyard-1
+                                    new_lmoves = new_lmoves+distance_to_shipyard
+                                    gravity = 0
+                            new_p = np
                                             
                     if new_direction.opposite() == direction:
                         gravity += bonus_on_highway(ln)
@@ -1614,9 +1672,9 @@ def agent(obs: Observation, config: Configuration):
     else:
         biggest_ship_count_threat = 0
 
-    if obs.step%50 == 49:
-        print(me.kore,len(me.shipyards),sum([fleet.ship_count for fleet in me.fleets]))
-        shipyard[2] = 2
+    #if obs.step%50 == 49:
+    #    print(me.kore,len(me.shipyards),sum([fleet.ship_count for fleet in me.fleets]))
+    #    shipyard[2] = 2
         
     # --------------------------------- Predict the next Boards ---------------------------------
     boards = predicts_next_boards(obs,config)
@@ -1627,9 +1685,11 @@ def agent(obs: Observation, config: Configuration):
     Normalize(space, size)
     logger.info("normalized")
     ApplyDangerLevel(space)
+    logger.info("danger level added")
     ApplyGravity(space)
-    Add_highways(space)
     logger.info("gravity added")
+    Add_highways(space)
+    logger.info("highways added")
     """
     if obs.step%10 == 0:
         space.show_gravity(size)
@@ -1645,7 +1705,6 @@ def agent(obs: Observation, config: Configuration):
     # ------------------- Notify that help is needed
     need_help = dict()
     for shipyard in shipyards:
-        print(shipyard.ship_count)
         if shipyard.id in incoming_attack:
             all_incoming_attacks = deepcopy(incoming_attack[shipyard.id])
             for i,(nb_step,nb_ships) in enumerate(all_incoming_attacks):

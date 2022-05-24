@@ -1,0 +1,35 @@
+13-55-06 - INFO - <step_1>, remaining_time=60.0
+13-55-07 - INFO - boards generated
+13-55-07 - INFO - normalized
+13-55-07 - INFO - danger level added
+13-55-08 - INFO - gravity added
+13-55-08 - INFO - highways added
+13-55-08 - INFO - attack detected : {}
+13-55-08 - INFO - []
+13-55-08 - INFO - found in 0
+13-55-08 - INFO - {'0-1': 'SPAWN_1'}
+13-55-08 - INFO - <step_2>, remaining_time=60.0
+13-55-08 - INFO - boards generated
+13-55-09 - INFO - normalized
+13-55-09 - INFO - danger level added
+13-55-10 - INFO - gravity added
+13-55-10 - INFO - highways added
+13-55-10 - INFO - attack detected : {}
+13-55-10 - INFO - []
+13-55-10 - INFO - found in 0
+13-55-10 - INFO - {'0-1': 'SPAWN_1'}
+13-55-10 - INFO - <step_3>, remaining_time=60.0
+13-55-10 - INFO - boards generated
+13-55-10 - INFO - normalized
+13-55-11 - INFO - danger level added
+13-55-12 - INFO - gravity added
+13-55-12 - INFO - highways added
+13-55-12 - INFO - attack detected : {}
+13-55-12 - INFO - to shipyard : S
+13-55-12 - INFO - to shipyard : N
+13-55-12 - INFO - to shipyard : E
+13-55-12 - INFO - to shipyard : W
+13-55-12 - INFO - [(-0.6074608111130309, 'S', 2), (-0.6074608111130309, 'N', 2), (-0.7713664622042854, 'E', 2), (-0.7713664622042854, 'W', 2)]
+13-55-12 - INFO - found in 45
+13-55-12 - INFO - {'0-1': 'SPAWN_2'}
+13-55-12 - INFO - <step_4>, remaining_time=60.0

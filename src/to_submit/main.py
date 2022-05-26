@@ -1,16 +1,12 @@
-from turtle import pos
 from xmlrpc.client import Boolean
-from kore_fleets import balanced_agent, random_agent, do_nothing_agent
-from logger import logger, init_logger
-from helpers import *
-from helpers import Observation, Point, Direction, ShipyardAction, Configuration, Player, Shipyard, ShipyardId, Board, Fleet, FleetId
+from kaggle_environments.envs.kore_fleets.helpers import *
+from kaggle_environments.envs.kore_fleets.helpers import Observation, Point, Direction, ShipyardAction, Configuration, Player, Shipyard, ShipyardId, Board, Fleet, FleetId
 import random
 import math
 import time
 from copy import deepcopy
 from typing import List, Dict, Tuple, Union
 import matplotlib.pyplot as plt
-import kaggle_environments.envs.kore_fleets.helpers
 
 external_timer = time.time()
 turn = 0
@@ -333,7 +329,7 @@ def predicts_next_boards(obs: Observation,config: Observation,n=40,my_first_acct
             op_next_actions = op_agent(new_obs,new_config)
             new_actions[op.id] = op_next_actions
         
-        new_board = Board(new_observation, new_configuration, new_actions).next()
+        new_board = Board(new_obs, new_config, new_actions).next()
         new_observation = new_board.observation
         new_configuration = new_board.configuration
         boards.append(new_board)
@@ -1007,7 +1003,7 @@ class Space:
         plt.matshow(res1)
         plt.matshow(res2)
         plt.show()
-        logger.info(f"{res2}")
+        # logger.info(f"{res2}")
     
     def get_danger_level_at_point(self,point4d: Point4d):
         return self.space[point4d.t].get_danger_level_at_point(point4d.point)
@@ -1439,7 +1435,7 @@ def astar3d(space: Space, shipyard: Shipyard, incoming_attacks :List[Tuple[int,i
     nb_shipyards = len(me.shipyards)
     ms = minimum_ships_for_this_state(me.kore,shipyard.max_spawn)
     Ms = shipyard.ship_count
-    logger.info(f"incoming : {incoming_attacks}")
+    # logger.info(f"incoming : {incoming_attacks}")
     if incoming_attacks != []:
         if incoming_attacks[0][0] == 1:
             Ms = Ms - incoming_attacks[0][1]
@@ -1483,7 +1479,7 @@ def astar3d(space: Space, shipyard: Shipyard, incoming_attacks :List[Tuple[int,i
             
         max_move = maximum_flight_plan_length(Ms)
         plan,lmoves = tplan
-        # logger.info(f"plan : {plan+str(lmoves)}, value : {value((r,ar,tr,p,cs,ms,Ms,ln,tplan))}, detail: r{r}, ar{ar}, tr{tr},ln{ln}")
+        # # logger.info(f"plan : {plan+str(lmoves)}, value : {value((r,ar,tr,p,cs,ms,Ms,ln,tplan))}, detail: r{r}, ar{ar}, tr{tr},ln{ln}")
         
         # -------------------- Checked if arrived at a destination ----------------
         # We do it here because it means that it had a high value
@@ -1526,7 +1522,7 @@ def astar3d(space: Space, shipyard: Shipyard, incoming_attacks :List[Tuple[int,i
                 else:
                     max_capacity_fleet = where_to_capacity(space,ln,fleet,shipyard)
                     #if max_capacity_fleet != -1 and max_capacity_fleet != 0 and max_capacity_fleet != 100000:
-                    #    logger.info(f"{max_capacity_fleet}")
+                    #    # logger.info(f"{max_capacity_fleet}")
                     if max_capacity_fleet == -1:
                         if fleet.ship_count < Ms+cs-ms:    # Get the fleet
                             # fleet_kore += reward_for_taking_an_ally_fleet(fleet.kore,fleet.ship_count)
@@ -1547,7 +1543,7 @@ def astar3d(space: Space, shipyard: Shipyard, incoming_attacks :List[Tuple[int,i
 
                             v = value((r,ar,0,p,cs,ms,Ms,ln+1,(new_plan,new_lmoves)))
                             if requirement_satisfied(v,ms,Ms,ln+1,0):
-                                logger.debug(f"to a fleet : {new_plan}, with value: {v}")
+                                # logger.debug(f"to a fleet : {new_plan}, with value: {v}")
                                 best_plan.append((v,new_plan,ms))
                             continue
 
@@ -1592,7 +1588,7 @@ def astar3d(space: Space, shipyard: Shipyard, incoming_attacks :List[Tuple[int,i
                 else:
                     gravity = malus_for_max_spawn(shipyard.max_spawn)
                 if requirement_satisfied(v,ms,Ms,ln):
-                    logger.debug(f"to shipyard : {new_plan}")
+                    # logger.debug(f"to shipyard : {new_plan}")
                     best_plan.append((value((r,ar,gravity,p,cs,ms,Ms,ln,(new_plan,new_lmoves))),new_plan,ms))
                 continue
             """
@@ -1613,7 +1609,7 @@ def astar3d(space: Space, shipyard: Shipyard, incoming_attacks :List[Tuple[int,i
                                 new_lmoves = new_lmoves+distance_to_shipyard
                                 v = value((r,ar,malus_for_max_spawn(0),p,cs,ms,Ms,ln,(new_plan,new_lmoves)))
                                 if requirement_satisfied(v,ms,Ms,ln,0):
-                                    logger.debug(f"to ally highway : {new_plan} with value: {v}")
+                                    # logger.debug(f"to ally highway : {new_plan} with value: {v}")
                                     best_plan.append((v,new_plan,ms))
                                 continue
                             else:
@@ -1633,10 +1629,10 @@ def astar3d(space: Space, shipyard: Shipyard, incoming_attacks :List[Tuple[int,i
                                     ln = ln+distance_to_shipyard
                                     new_lmoves = new_lmoves+distance_to_shipyard
                                     gravity = 0
-                                #logger.info(f"to enemy highway : {new_plan}")
+                                ## logger.info(f"to enemy highway : {new_plan}")
                                 v = value((r,ar,0,p,cs,ms,Ms,ln,(new_plan,new_lmoves)))
                                 if requirement_satisfied(v,ms,Ms,ln,0):
-                                    logger.debug(f"to enemy highway : {new_plan} with value: {v}")
+                                    # logger.debug(f"to enemy highway : {new_plan} with value: {v}")
                                     best_plan.append((v,new_plan,ms))
                                 continue
                             new_p = np
@@ -1668,12 +1664,12 @@ def astar3d(space: Space, shipyard: Shipyard, incoming_attacks :List[Tuple[int,i
                 continue
             sortedAppend(priority_list,new_elmt)
             
-    logger.info(f"found in {nb_iter}")
+    # logger.info(f"found in {nb_iter}")
     if best_plan == []:
         return ("",0)
     best = max(best_plan)
     if best[0]>0:
-        logger.info(f"best ship : {best[1]} sends {best[2]} ships with value of {best[0]}")
+        # logger.info(f"best ship : {best[1]} sends {best[2]} ships with value of {best[0]}")
         # TODO : Optimize ms to get the best value (get an intelligent function to do that)
         return (best[1],best[2])
     return ("",0)
@@ -1722,14 +1718,14 @@ def detect_attack(boards : List[Board]) -> Dict[ShipyardId,List[Tuple[int,int]]]
                                     in_danger[shipyards[s].id] += [(i+1,fleet.ship_count)]
                             else:
                                 in_danger[shipyards[s].id] = [(i+1,fleet.ship_count)]
-    logger.info(f"attack detected : {in_danger}")
+    # logger.info(f"attack detected : {in_danger}")
     return in_danger
         
 
 def agent(obs: Observation, config: Configuration):
     global turn
-    if obs.step == 0:
-        init_logger(logger)
+    #if obs.step == 0:
+    #    init_logger(# logger)
     
     board = Board(obs, config)
     if obs.step == 0:
@@ -1737,7 +1733,7 @@ def agent(obs: Observation, config: Configuration):
     step = board.step
     my_id = obs["player"]
     remaining_time = obs["remainingOverageTime"]
-    logger.info(f"<step_{step + 1}>, remaining_time={remaining_time:.1f}")
+    # logger.info(f"<step_{step + 1}>, remaining_time={remaining_time:.1f}")
     me = board.current_player
     turn = board.step
     spawn_cost = board.configuration.spawn_cost
@@ -1757,20 +1753,19 @@ def agent(obs: Observation, config: Configuration):
     #    shipyard[2] = 2
         
     # --------------------------------- Predict the next Boards ---------------------------------
-    if obs.step == 0:
-        boards = predicts_next_boards(obs,config)
-    logger.info("boards generated")
+    boards = predicts_next_boards(obs,config)
+    # logger.info("boards generated")
 
     # --------------------------------- Generate Gravity for all ships ----------------------
     space = Space(boards)
     Normalize(space, size)
-    logger.info("normalized")
+    # logger.info("normalized")
     ApplyDangerLevel(space)
-    logger.info("danger level added")
+    # logger.info("danger level added")
     ApplyGravity(space)
-    logger.info("gravity added")
+    # logger.info("gravity added")
     Add_highways(space)
-    logger.info("highways added")
+    # logger.info("highways added")
     """
     if obs.step%10 == 0:
         space.show_gravity(size)
@@ -1796,7 +1791,7 @@ def agent(obs: Observation, config: Configuration):
                     ishipyard = iboard.shipyards[shipyard.id]
                     if nb_ships > ishipyard.ship_count:
                         need_help[shipyard.id] = [(nb_step,nb_ships-ishipyard.ship_count)]
-                        logger.info(f"need help !! Need {nb_ships-ishipyard.ship_count} ships in {nb_step} turns")
+                        # logger.info(f"need help !! Need {nb_ships-ishipyard.ship_count} ships in {nb_step} turns")
                 else:
                     iboard = boards[nb_step-1]
                     ime = iboard.current_player
@@ -1805,10 +1800,10 @@ def agent(obs: Observation, config: Configuration):
                         if nb_ships > ishipyard.ship_count:
                             if shipyard.id in need_help:
                                 need_help[shipyard.id] += [(nb_step,nb_ships-ishipyard.ship_count)]
-                                logger.info(f"need 2nd help !! Need {nb_ships-ishipyard.ship_count} ships in {nb_step} turns")
+                                # logger.info(f"need 2nd help !! Need {nb_ships-ishipyard.ship_count} ships in {nb_step} turns")
                             else:
                                 need_help[shipyard.id] = [(nb_step,nb_ships-ishipyard.ship_count)]
-                                logger.info(f"need help for the others !! Need {nb_ships-ishipyard.ship_count} ships in {nb_step} turns")
+                                # logger.info(f"need help for the others !! Need {nb_ships-ishipyard.ship_count} ships in {nb_step} turns")
                     else:
                         if shipyard.id in need_help:
                             need_help[shipyard.id] += [(nb_step,nb_ships)]
@@ -1832,13 +1827,13 @@ def agent(obs: Observation, config: Configuration):
                                 plan = compose(safe_plan_to_pos(boards,other_shipyard.id,shipyard.position,ship_send))
                                 if plan != "":
                                     ships_left -= ship_send
-                                    logger.info(f"Help found, incoming, {ship_send} ships sent")
+                                    # logger.info(f"Help found, incoming, {ship_send} ships sent")
                                     if ships_left>= nb_ships:
                                         help_needed.pop(0)
                                     else:
                                         help_needed[0] = (nb_step,nb_ships-ship_send)
-                                else:
-                                    logger.info("No routes found to help :(")
+                                #else:
+                                    # logger.info("No routes found to help :(")
                             elif other_shipyard.position.distance_to(shipyard.position,size)< nb_step:
                                 delta_t = nb_step-other_shipyard.position.distance_to(shipyard.position,size)
                                 possible_ship_number = space.get_shipyard_at_point(Point4d(other_shipyard.position,delta_t,None)).ship_count
@@ -1849,7 +1844,7 @@ def agent(obs: Observation, config: Configuration):
                                     incoming_attack[other_shipyard.id] = [(delta_t,possible_ship_number)]
 
                                 help_needed[0] = (nb_step,nb_ships-possible_ship_number)
-                                logger.info(f"Help found, incoming in {delta_t} turns, {possible_ship_number} ships")
+                                # logger.info(f"Help found, incoming in {delta_t} turns, {possible_ship_number} ships")
                 if plan != "":
                     action_shipyard[other_shipyard.id] = ShipyardAction.launch_fleet_with_flight_plan(other_shipyard.ship_count-ships_left, plan)
                     space.send_ghost_fleet(Point4d(other_shipyard.position,0,None),other_shipyard.ship_count-ships_left,plan,me.id)
@@ -1910,16 +1905,6 @@ def agent(obs: Observation, config: Configuration):
                 action = ShipyardAction.spawn_ships(int(min(shipyard.max_spawn,kore_left/spawn_cost)))
                 kore_left -= int(min(shipyard.max_spawn,kore_left/spawn_cost))*spawn_cost
         shipyard.next_action = action
-    logger.info(me.next_actions)
+    # logger.info(me.next_actions)
     return me.next_actions
 
-
-if __name__ == "__main__":
-    from kaggle_environments import make
-    for tries in range(10):
-        try_number = tries
-        env = make("kore_fleets", debug=True)
-        print("try number ",tries+1)
-        print(env.name, env.version)
-
-        env.run([agent,balanced_agent])

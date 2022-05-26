@@ -509,6 +509,3 @@ def html_renderer():
     js_path = path.abspath(path.join(dir_path, "kore_fleets.js"))
     with open(js_path) as js_file:
         return js_file.read()
-
-def agent(obs,config):
-    return balanced_agent(obs,config)

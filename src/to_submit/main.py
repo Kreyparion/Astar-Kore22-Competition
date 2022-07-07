@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 external_timer = time.time()
 turn = 0
 try_number = 0
+saved_gravity2 = []
 
 class Timer:
     def __init__(self, func):
@@ -304,7 +305,7 @@ def spawn_agent(obs: Observation,config: Configuration):
     return me.next_actions
 
 @Timer
-def predicts_next_boards(obs: Observation,config: Observation,n=40,my_first_acctions=None,my_agent=spawn_agent,op_agent=spawn_agent):
+def predicts_next_boards(obs: Observation,config: Observation,n=30,my_first_acctions=None,my_agent=spawn_agent,op_agent=spawn_agent):
     board = Board(obs, config)
     me = board.current_player
     boards = [board]
@@ -734,6 +735,8 @@ class Slice:
     def add_gravity2(self: 'Slice', position: Point, val: float) -> None:
         self.gravity2[position.x][position.y] += val
     
+    def set_slice_gravity(self: 'Slice',slice_gravity:List[List[float]]):
+        self.gravity2 = slice_gravity
 
     def multiply_gravity(self: 'Slice', position: Point, val: float) -> None:
         if position in self.gravity:
@@ -1169,7 +1172,14 @@ def mid_game_filter():
             [cc,ld,dd,ld,cc]]
     return filter,ratio
 
-
+def LoadGravity(space: Space):
+    global saved_gravity2
+    if turn%2 == 0:
+        for i in range(2*len(space)//3+1,len(saved_gravity2)):
+            space[i].set_slice_gravity(saved_gravity2[i-1])
+    else:
+        for i in range(len(space)//3+1,2*len(space)//3+1):
+            space[i].set_slice_gravity(saved_gravity2[i-1])
 
 @Timer
 def ApplyGravity(space: Space):
@@ -1189,44 +1199,51 @@ def ApplyGravity(space: Space):
 
     myY = [(k*i+j)/(u*i+v)+c*i for i in X]
     # ---- Gravity for the enemy fleets and shipyards
-    
-    for n in range(len(space)):
-        nops = space[n].board.opponents
-        for op in nops:
-            for fleet in op.fleets:
-                pos = Point4d(fleet.position,n,None)
-                space.add_gravity2(pos,reward_for_taking_an_ennemy_fleet(fleet.kore,fleet.ship_count))
-                for i in range(4):
-                    d = Direction.from_index(i)
-                    posi = pos.translate(d,size)
-                    space.add_gravity2(posi,reward_for_taking_a_side_ennemy_fleet(fleet.kore,fleet.ship_count))
-            #for shipyard in op.shipyards:
-            #    space.add_gravity(Point4d(shipyard.position,n,None),reward_for_taking_a_shipyard(shipyard.max_spawn))
-        for i in range(size):
-            for j in range(size):
-                point = Point4d(Point(i,j),n,None)
-                space.add_gravity2(point,space.get_kore2_at_point(point))
-    
-    for n in range(len(space)-1,-1,-1):
-        for i in range(size):
-            for j in range(size):
-                sum = 0
-                for k in range(len(filter)):
-                    for l in range(len(filter[0])):
-                        t = n+abs(-k+len(filter)//2)+abs(-l+len(filter)//2)
-                        if t>len(space)-1:
-                            t = len(space)-1
-                        x = (i-k+len(filter)//2)%size
-                        y = (j-l+len(filter[0])//2)%size
-                        sum += space.get_gravity2_at_point(Point4d(Point(x,y),t,None))*filter[k][l]
-                point = Point4d(Point(i,j),n,None)
-                space.add_gravity2(point,(sum + space.get_kore2_at_point(point))/10)
-    
-    for n in range(len(space)-1,-1,-1):
-        for i in range(size):
-            for j in range(size):
-                space.multiply_gravity2(Point4d(Point(i,j),n,None),myY[n]*ratio)
+    def applyfilter(begining,end):
+        for n in range(begining,end):
+            nops = space[n].board.opponents
+            for op in nops:
+                for fleet in op.fleets:
+                    pos = Point4d(fleet.position,n,None)
+                    space.add_gravity2(pos,reward_for_taking_an_ennemy_fleet(fleet.kore,fleet.ship_count))
+                    for i in range(4):
+                        d = Direction.from_index(i)
+                        posi = pos.translate(d,size)
+                        space.add_gravity2(posi,reward_for_taking_a_side_ennemy_fleet(fleet.kore,fleet.ship_count))
+                #for shipyard in op.shipyards:
+                #    space.add_gravity(Point4d(shipyard.position,n,None),reward_for_taking_a_shipyard(shipyard.max_spawn))
+            for i in range(size):
+                for j in range(size):
+                    point = Point4d(Point(i,j),n,None)
+                    space.add_gravity2(point,space.get_kore2_at_point(point))
+        
+        for n in range(end-1,begining-1,-1):
+            for i in range(size):
+                for j in range(size):
+                    sum = 0
+                    for k in range(len(filter)):
+                        for l in range(len(filter[0])):
+                            t = n+abs(-k+len(filter)//2)+abs(-l+len(filter)//2)
+                            if t>len(space)-1:
+                                t = len(space)-1
+                            x = (i-k+len(filter)//2)%size
+                            y = (j-l+len(filter[0])//2)%size
+                            sum += space.get_gravity2_at_point(Point4d(Point(x,y),t,None))*filter[k][l]
+                    point = Point4d(Point(i,j),n,None)
+                    space.add_gravity2(point,(sum + space.get_kore2_at_point(point))/10)
+        
+        for n in range(end-1,begining-1,-1):
+            for i in range(size):
+                for j in range(size):
+                    space.multiply_gravity2(Point4d(Point(i,j),n,None),myY[n]*ratio)
+    if turn%2 == 0:
+        applyfilter(0,2*len(space)//3+1)
+    else:
+        applyfilter(2*len(space)//3+1,len(space))
+        applyfilter(0,len(space)//3+1)
 
+    space.show_gravity(size)
+    
 
     # space.show_gravity(size)
 @Timer
@@ -1450,7 +1467,7 @@ def astar3d(space: Space, shipyard: Shipyard, incoming_attacks :List[Tuple[int,i
     nsatltas= shipyard.ship_count #number_ship_available_to_launch_to_another_shipyard
     for (limit_step,limit_ship_nb) in incoming_attacks:
         nsatltas -= limit_ship_nb
-    while priority_list != [] and nb_iter<4000//nb_shipyards:
+    while priority_list != [] and nb_iter<3000//nb_shipyards:
         nb_iter += 1
         (r,ar,tr,p,cs,ms,Ms,ln,tplan) = priority_list.pop()
         """
@@ -1723,7 +1740,7 @@ def detect_attack(boards : List[Board]) -> Dict[ShipyardId,List[Tuple[int,int]]]
         
 
 def agent(obs: Observation, config: Configuration):
-    global turn
+    global turn, saved_gravity2
     #if obs.step == 0:
     #    init_logger(# logger)
     
@@ -1762,6 +1779,8 @@ def agent(obs: Observation, config: Configuration):
     # logger.info("normalized")
     ApplyDangerLevel(space)
     # logger.info("danger level added")
+    #LoadGravity(space)
+    # logger.info("saved gravity loaded")
     ApplyGravity(space)
     # logger.info("gravity added")
     Add_highways(space)
@@ -1906,5 +1925,17 @@ def agent(obs: Observation, config: Configuration):
                 kore_left -= int(min(shipyard.max_spawn,kore_left/spawn_cost))*spawn_cost
         shipyard.next_action = action
     # logger.info(me.next_actions)
+    saved_gravity2 = [slice.gravity2 for slice in space]
     return me.next_actions
 
+if __name__ == "__main__":
+    from kaggle_environments import make
+    def do_nothing(conf,obs):
+        return
+    for tries in range(10):
+        try_number = tries
+        env = make("kore_fleets",debug = True)
+        print("try number ",tries+1)
+        print(env.name, env.version)
+
+        env.run([agent,do_nothing])

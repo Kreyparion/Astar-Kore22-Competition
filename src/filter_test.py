@@ -9,10 +9,10 @@ from math import exp,log,sqrt
 a = [[[0 for i in range(20)] for j in range(20)] for loop in range(40)]
 for i in range(len(a)):
     a[i][5][5] = 100
-    a[i][4][4] = 70
-    a[i][3][4] = 70
-    a[i][4][3] = 70
-    a[i][16][16] = 100
+    #a[i][4][4] = 70
+    #a[i][3][4] = 70
+    #a[i][4][3] = 70
+    #a[i][16][16] = 100
     #a[i][10][10] = 10
 """
     a[i][6][6] = 100
@@ -144,6 +144,21 @@ filter_wild = [[cc,ld,dd,ld,cc],
           [ld,cd,d,cd,ld],
           [cc,ld,dd,ld,cc]]
 
+dimin = 1
+cc = -0 * dimin
+cd = -1.0 * dimin
+ld = -0.6 * dimin
+c = -0 * dimin
+d = 3.3 * dimin
+dd = 1.25 * dimin
+ratio = 3.2/10
+
+compact_wild = [[cc,ld,dd,ld,cc],
+          [ld,cd,d,cd,ld],
+          [dd,d,c,d,dd],
+          [ld,cd,d,cd,ld],
+          [cc,ld,dd,ld,cc]]
+
 """
 ratio = 0.072
 l = -2.6
@@ -270,15 +285,15 @@ for n in range(len(a)-1,-1,-1):
 """
 
 
-plt.matshow(a[0])
-plt.matshow(a[0])
+#plt.matshow(a[0])
+#plt.matshow(a[0])
 normalize_all(a)
-plt.matshow(a[0])
-plt.show()
+#plt.matshow(a[0])
+#plt.show()
 
 
 for i in range(len(a)-1,-1,-1):
-    use_t_filter2(a,i,filter_wild)
+    use_t_filter2(a,i,compact_wild)
 
 #multiple_filter(a)
 """

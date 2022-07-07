@@ -14,8 +14,10 @@
 
 from copy import deepcopy
 from enum import Enum, auto
+from fnmatch import translate
 from functools import wraps
 from kaggle_environments.helpers import Point, group_by, Direction
+from kaggle_environments.main import log_path
 from typing import *
 import sys
 import math
@@ -908,6 +910,88 @@ class Board:
         # self.print()
 
         return board
+    """
+    
+    def fleet_life(n,boards: List['Board'],fleet: List[Fleet],size) -> Tuple[List[Fleet],Point]:
+        res: List[Fleet]
+        res = []
+        for i in range(n,len(boards)):
+            boardi = boards[i]
+            if fleet.id in boardi.fleets:
+                res.append(boardi.fleets[fleet.id])
+            else:
+                d = res[-1].direction
+                if res[-1].flight_plan and res[-1].flight_plan[0].isalpha():
+                    d = Direction.from_char(res[-1].flight_plan[0])
+                return (res,res[-1].position.translate(Direction.to_point(d),size))
+        d = res[-1].direction
+        if res[-1].flight_plan and res[-1].flight_plan[0].isalpha():
+            d = Direction.from_char(res[-1].flight_plan[0])
+        return (res,res[-1].position.translate(Direction.to_point(d),size))
+                
+    def check_the_influenced_fleet_by_fleet(self,board: 'Board',fleet):
+        if not fleet.id in self.fleets:
+            if not fleet.id in board.fleets:
+                pass
+            
+    def update_next(self,board: 'Board',fleet_to_update,shipyard_to_update):
+        pass
+            
+            
+        # for a single fleet, we need to check 8 cells : in cross with edge pattern (for the side fleet attacks)
+        # for a shipyard, we need to check only 4 cells : the 4 sides
+        # we also need to make sure to update the total amount of kore of each player 
+        # every time a fleet arrives/doesn't arrive to the shipyard
+         
+        # for every fleet that disapear we need to know everything on it -> use previous board ?
+        
+    def update_boards(self, boards: List['Board']):
+        fleet_to_update = []
+        shipyard_to_update = []
+        fleet_to_delete = []
+        boards = boards[1:]
+        board0 = boards[0]
+        for shipyardID,shipyard in self._shipyards.items():
+            lenttu = len(fleet_to_update) + len(shipyard_to_update)+ len(fleet_to_delete)
+            for i in range(4):
+                d = Direction.from_index(i)
+                pos = shipyard.position.translate(d.to_point(),self.configuration.size)
+                fleet = self.get_fleet_at_point(pos)
+                fleet1 = board0.get_fleet_at_point(pos)
+                if fleet == None and fleet1 == None:
+                    continue
+                if fleet != None and fleet1 == None:
+                    if fleet.direction != d:
+                        continue
+                    fleet_to_update.append(fleet)
+                if fleet == None and fleet1 != None:
+                    fleet_to_delete.append(fleet_life(0,boards,fleet1))
+                if fleet != None and fleet1 != None:
+                    if fleet.id == fleet1.id:
+                        if fleet.ship_count == fleet1.ship_count:
+                            continue
+                        else:
+                            fleet_to_update.append(fleet)
+                    else:
+                        fleet_to_update.append(fleet)
+                        fleet_to_delete.append(fleet_life(0,boards,fleet1))
+                    
+                ishipyard = self.get_fleet_at_point(pos)
+                if ishipyard != None:
+                    ishipyard1 = board0.get_shipyard_at_point(pos)
+                    if ishipyard1 == None:
+                        raise("weird shipyard manipulation")
+                    if shipyard.ship_count != ishipyard1.ship_count:
+                        shipyard_to_update.append(ishipyard.position)
+            if lenttu < len(fleet_to_update)+len(shipyard_to_update)+len(fleet_to_delete):
+                shipyard_to_update.append(shipyard.position)
+        
+        boards[0] = self
+        for i in range(len(boards)-1):
+            boards[i].update_next(boards[i+1],fleet_to_delete,fleet_to_update,shipyard_to_update)
+        """
+        
+        
 
 
 def board_agent(agent: Callable[[Board], None]):

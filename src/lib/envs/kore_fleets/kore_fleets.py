@@ -390,7 +390,8 @@ def populate_board(state, env):
 
     dir_path = path.dirname(__file__)
     json_path = path.abspath(path.join(dir_path, "config_map.json"))
-    nb_ships = 0
+    nb_ships = [0,0]
+
     with open(json_path) as json_file:
         config_map = json.load(json_file)
         if "kore_map" in config_map:
@@ -399,7 +400,10 @@ def populate_board(state, env):
                 for j in range(len(kore_map[0])):
                     obs.kore[size*(j)+i] = kore_map[i][j]
         if "nb_ships" in config_map:
-            nb_ships = config_map["nb_ships"]
+            nb_ships[0] = config_map["nb_ships"]
+        nb_ships[1] = nb_ships[0]
+        if "enemy_ships" in config_map:
+            nb_ships[1] = config_map["enemy_ships"]
         if "nb_steps" in config_map:
             config.episodeSteps = config_map["nb_steps"]
     
@@ -424,7 +428,7 @@ def populate_board(state, env):
     # Initialize the players.
     obs.players = []
     for i in range(num_agents):
-        shipyards = {create_uid(): [starting_positions[i], nb_ships, 0]}
+        shipyards = {create_uid(): [starting_positions[i], nb_ships[i], 0]}
         obs.players.append([state[0].reward, shipyards, {}])
 
     return state

@@ -1,104 +1,219 @@
-17-12-16 - INFO - <step_1>, remaining_time=60.0
-17-12-16 - INFO - boards generated
-17-12-16 - INFO - normalized
-17-12-16 - INFO - danger level added
-17-12-17 - INFO - gravity added
-17-12-17 - INFO - highways added
-17-12-17 - INFO - attack detected : {}
-17-12-17 - INFO - incoming : []
-17-12-17 - INFO - found in 0
-17-12-17 - INFO - {'0-1': 'SPAWN_1'}
-17-12-17 - INFO - <step_2>, remaining_time=60.0
-17-12-17 - INFO - boards generated
-17-12-17 - INFO - normalized
-17-12-17 - INFO - danger level added
-17-12-18 - INFO - gravity added
-17-12-18 - INFO - highways added
-17-12-18 - INFO - attack detected : {}
-17-12-18 - INFO - incoming : []
-17-12-18 - INFO - found in 0
-17-12-18 - INFO - {'0-1': 'SPAWN_1'}
-17-12-18 - INFO - <step_3>, remaining_time=60.0
-17-12-18 - INFO - boards generated
-17-12-18 - INFO - normalized
-17-12-18 - INFO - danger level added
-17-12-19 - INFO - gravity added
-17-12-19 - INFO - highways added
-17-12-19 - INFO - attack detected : {}
-17-12-19 - INFO - incoming : []
-17-12-19 - INFO - found in 1
-17-12-19 - INFO - {'0-1': 'SPAWN_2'}
-17-12-19 - INFO - <step_4>, remaining_time=60.0
-17-12-19 - INFO - boards generated
-17-12-19 - INFO - normalized
-17-12-19 - INFO - danger level added
-17-12-19 - INFO - gravity added
-17-12-19 - INFO - highways added
-17-12-19 - INFO - attack detected : {}
-17-12-19 - INFO - incoming : []
-17-12-19 - INFO - found in 1
-17-12-19 - INFO - {'0-1': 'SPAWN_2'}
-17-12-19 - INFO - <step_5>, remaining_time=60.0
-17-12-20 - INFO - boards generated
-17-12-20 - INFO - normalized
-17-12-20 - INFO - danger level added
-17-12-20 - INFO - gravity added
-17-12-20 - INFO - highways added
-17-12-20 - INFO - attack detected : {}
-17-12-20 - INFO - incoming : []
-17-12-20 - INFO - found in 1
-17-12-20 - INFO - {'0-1': 'SPAWN_2'}
-17-12-20 - INFO - <step_6>, remaining_time=60.0
-17-12-21 - INFO - boards generated
-17-12-21 - INFO - normalized
-17-12-21 - INFO - danger level added
-17-12-21 - INFO - gravity added
-17-12-21 - INFO - highways added
-17-12-21 - INFO - attack detected : {}
-17-12-21 - INFO - incoming : []
-17-12-21 - INFO - found in 1
-17-12-21 - INFO - {'0-1': 'SPAWN_2'}
-17-12-21 - INFO - <step_7>, remaining_time=60.0
-17-12-21 - INFO - boards generated
-17-12-22 - INFO - normalized
-17-12-22 - INFO - danger level added
-17-12-22 - INFO - gravity added
-17-12-22 - INFO - highways added
-17-12-22 - INFO - attack detected : {}
-17-12-22 - INFO - incoming : []
-17-12-22 - INFO - found in 1
-17-12-22 - INFO - {'0-1': 'SPAWN_2'}
-17-12-22 - INFO - <step_8>, remaining_time=60.0
-17-12-22 - INFO - boards generated
-17-12-22 - INFO - normalized
-17-12-23 - INFO - danger level added
-17-12-23 - INFO - gravity added
-17-12-23 - INFO - highways added
-17-12-23 - INFO - attack detected : {}
-17-12-23 - INFO - incoming : []
-17-12-23 - INFO - found in 1
-17-12-23 - INFO - {'0-1': 'SPAWN_3'}
-17-12-23 - INFO - <step_9>, remaining_time=60.0
-17-12-23 - INFO - boards generated
-17-12-23 - INFO - normalized
-17-12-23 - INFO - danger level added
-17-12-24 - INFO - gravity added
-17-12-24 - INFO - highways added
-17-12-24 - INFO - attack detected : {}
-17-12-24 - INFO - incoming : []
-17-12-24 - INFO - found in 1
-17-12-24 - INFO - {'0-1': 'SPAWN_3'}
-17-12-24 - INFO - <step_10>, remaining_time=60.0
-17-12-24 - INFO - boards generated
-17-12-24 - INFO - normalized
-17-12-24 - INFO - danger level added
-17-12-25 - INFO - gravity added
-17-12-25 - INFO - highways added
-17-12-25 - INFO - attack detected : {}
-17-12-25 - INFO - incoming : []
-17-12-25 - INFO - found in 1
-17-12-25 - INFO - {'0-1': 'SPAWN_3'}
-17-12-25 - INFO - <step_11>, remaining_time=60.0
-17-12-25 - INFO - boards generated
-17-12-25 - INFO - normalized
-17-12-25 - INFO - danger level added
+18-54-19 - INFO - <step_1>, remaining_time=60.0
+18-54-20 - INFO - boards generated
+18-54-20 - INFO - normalized
+18-54-20 - INFO - danger level added
+18-54-20 - INFO - gravity added
+18-54-20 - INFO - highways added
+18-54-20 - INFO - attack detected : {}
+18-54-20 - INFO - incoming : []
+18-54-20 - INFO - found in 0
+18-54-20 - INFO - {'0-1': 'SPAWN_1'}
+18-54-20 - INFO - <step_2>, remaining_time=60.0
+18-54-21 - INFO - boards generated
+18-54-21 - INFO - normalized
+18-54-21 - INFO - danger level added
+18-54-21 - INFO - gravity added
+18-54-21 - INFO - highways added
+18-54-21 - INFO - attack detected : {}
+18-54-21 - INFO - incoming : []
+18-54-21 - INFO - found in 0
+18-54-21 - INFO - {'0-1': 'SPAWN_1'}
+18-54-21 - INFO - <step_3>, remaining_time=60.0
+18-54-22 - INFO - boards generated
+18-54-22 - INFO - normalized
+18-54-22 - INFO - danger level added
+18-54-22 - INFO - gravity added
+18-54-22 - INFO - highways added
+18-54-22 - INFO - attack detected : {}
+18-54-22 - INFO - incoming : []
+18-54-22 - INFO - found in 41
+18-54-22 - INFO - {'0-1': 'SPAWN_2'}
+18-54-22 - INFO - <step_4>, remaining_time=60.0
+18-54-22 - INFO - boards generated
+18-54-23 - INFO - normalized
+18-54-23 - INFO - danger level added
+18-54-23 - INFO - gravity added
+18-54-23 - INFO - highways added
+18-54-23 - INFO - attack detected : {}
+18-54-23 - INFO - incoming : []
+18-54-23 - INFO - found in 41
+18-54-23 - INFO - {'0-1': 'SPAWN_2'}
+18-54-23 - INFO - <step_5>, remaining_time=60.0
+18-54-23 - INFO - boards generated
+18-54-23 - INFO - normalized
+18-54-24 - INFO - danger level added
+18-54-24 - INFO - gravity added
+18-54-24 - INFO - highways added
+18-54-24 - INFO - attack detected : {}
+18-54-24 - INFO - incoming : []
+18-54-24 - INFO - found in 137
+18-54-24 - INFO - {'0-1': 'SPAWN_2'}
+18-54-24 - INFO - <step_6>, remaining_time=60.0
+18-54-24 - INFO - boards generated
+18-54-24 - INFO - normalized
+18-54-24 - INFO - danger level added
+18-54-25 - INFO - gravity added
+18-54-25 - INFO - highways added
+18-54-25 - INFO - attack detected : {}
+18-54-25 - INFO - incoming : []
+18-54-25 - INFO - found in 969
+18-54-25 - INFO - {'0-1': 'SPAWN_2'}
+18-54-25 - INFO - <step_7>, remaining_time=60.0
+18-54-25 - INFO - boards generated
+18-54-25 - INFO - normalized
+18-54-25 - INFO - danger level added
+18-54-26 - INFO - gravity added
+18-54-26 - INFO - highways added
+18-54-26 - INFO - attack detected : {}
+18-54-26 - INFO - incoming : []
+18-54-26 - INFO - found in 969
+18-54-26 - INFO - {'0-1': 'SPAWN_2'}
+18-54-26 - INFO - <step_8>, remaining_time=60.0
+18-54-26 - INFO - boards generated
+18-54-26 - INFO - normalized
+18-54-27 - INFO - danger level added
+18-54-27 - INFO - gravity added
+18-54-27 - INFO - highways added
+18-54-27 - INFO - attack detected : {}
+18-54-27 - INFO - incoming : []
+18-54-27 - INFO - found in 970
+18-54-27 - INFO - best ship : E5W sends 3 ships with value of 0.07981578881490906
+18-54-27 - INFO - {'0-1': 'LAUNCH_3_E5W'}
+18-54-27 - INFO - <step_9>, remaining_time=60.0
+18-54-27 - INFO - boards generated
+18-54-28 - INFO - normalized
+18-54-28 - INFO - danger level added
+18-54-28 - INFO - gravity added
+18-54-28 - INFO - highways added
+18-54-28 - INFO - attack detected : {}
+18-54-28 - INFO - incoming : []
+18-54-28 - INFO - found in 971
+18-54-28 - INFO - best ship : E5W sends 3 ships with value of 0.0023226911282467066
+18-54-28 - INFO - {'0-1': 'LAUNCH_3_E5W'}
+18-54-28 - INFO - <step_10>, remaining_time=60.0
+18-54-29 - INFO - boards generated
+18-54-29 - INFO - normalized
+18-54-29 - INFO - danger level added
+18-54-29 - INFO - gravity added
+18-54-29 - INFO - highways added
+18-54-29 - INFO - attack detected : {}
+18-54-29 - INFO - incoming : []
+18-54-29 - INFO - found in 122
+18-54-29 - INFO - {'0-1': 'SPAWN_3'}
+18-54-29 - INFO - <step_11>, remaining_time=60.0
+18-54-29 - INFO - boards generated
+18-54-30 - INFO - normalized
+18-54-30 - INFO - danger level added
+18-54-30 - INFO - gravity added
+18-54-30 - INFO - highways added
+18-54-30 - INFO - attack detected : {}
+18-54-30 - INFO - incoming : []
+18-54-30 - INFO - found in 919
+18-54-30 - INFO - {'0-1': 'SPAWN_3'}
+18-54-30 - INFO - <step_12>, remaining_time=60.0
+18-54-30 - INFO - boards generated
+18-54-31 - INFO - normalized
+18-54-31 - INFO - danger level added
+18-54-31 - INFO - gravity added
+18-54-31 - INFO - highways added
+18-54-31 - INFO - attack detected : {}
+18-54-31 - INFO - incoming : []
+18-54-31 - INFO - found in 907
+18-54-31 - INFO - {'0-1': 'SPAWN_3'}
+18-54-31 - INFO - <step_13>, remaining_time=60.0
+18-54-32 - INFO - boards generated
+18-54-32 - INFO - normalized
+18-54-32 - INFO - danger level added
+18-54-32 - INFO - gravity added
+18-54-32 - INFO - highways added
+18-54-32 - INFO - attack detected : {}
+18-54-32 - INFO - incoming : []
+18-54-32 - INFO - found in 2000
+18-54-32 - INFO - best ship : S1EWN sends 8 ships with value of 0.8047673077510283
+18-54-32 - INFO - {'0-1': 'LAUNCH_8_S1EWN'}
+18-54-32 - INFO - <step_14>, remaining_time=60.0
+18-54-33 - INFO - boards generated
+18-54-33 - INFO - normalized
+18-54-33 - INFO - danger level added
+18-54-33 - INFO - gravity added
+18-54-33 - INFO - highways added
+18-54-33 - INFO - attack detected : {}
+18-54-33 - INFO - incoming : []
+18-54-33 - INFO - found in 129
+18-54-33 - INFO - {'0-1': 'SPAWN_3'}
+18-54-33 - INFO - <step_15>, remaining_time=60.0
+18-54-34 - INFO - boards generated
+18-54-34 - INFO - normalized
+18-54-34 - INFO - danger level added
+18-54-34 - INFO - gravity added
+18-54-34 - INFO - highways added
+18-54-34 - INFO - attack detected : {}
+18-54-34 - INFO - incoming : []
+18-54-34 - INFO - found in 774
+18-54-34 - INFO - {'0-1': 'SPAWN_3'}
+18-54-34 - INFO - <step_16>, remaining_time=60.0
+18-54-35 - INFO - boards generated
+18-54-35 - INFO - normalized
+18-54-35 - INFO - danger level added
+18-54-35 - INFO - gravity added
+18-54-35 - INFO - highways added
+18-54-35 - INFO - attack detected : {}
+18-54-35 - INFO - incoming : []
+18-54-36 - INFO - found in 2000
+18-54-36 - INFO - best ship : S1EWN sends 8 ships with value of 0.46160208729345226
+18-54-36 - INFO - {'0-1': 'LAUNCH_8_S1EWN'}
+18-54-36 - INFO - <step_17>, remaining_time=60.0
+18-54-36 - INFO - boards generated
+18-54-36 - INFO - normalized
+18-54-36 - INFO - danger level added
+18-54-37 - INFO - gravity added
+18-54-37 - INFO - highways added
+18-54-37 - INFO - attack detected : {}
+18-54-37 - INFO - incoming : []
+18-54-37 - INFO - found in 92
+18-54-37 - INFO - {'0-1': 'SPAWN_3'}
+18-54-37 - INFO - <step_18>, remaining_time=60.0
+18-54-37 - INFO - boards generated
+18-54-37 - INFO - normalized
+18-54-37 - INFO - danger level added
+18-54-37 - INFO - gravity added
+18-54-37 - INFO - highways added
+18-54-37 - INFO - attack detected : {}
+18-54-37 - INFO - incoming : []
+18-54-38 - INFO - found in 645
+18-54-38 - INFO - {'0-1': 'SPAWN_4'}
+18-54-38 - INFO - <step_19>, remaining_time=60.0
+18-54-38 - INFO - boards generated
+18-54-38 - INFO - normalized
+18-54-38 - INFO - danger level added
+18-54-38 - INFO - gravity added
+18-54-38 - INFO - highways added
+18-54-38 - INFO - attack detected : {}
+18-54-38 - INFO - incoming : []
+18-54-39 - INFO - found in 2000
+18-54-39 - INFO - best ship : S1EWN sends 8 ships with value of 0.4669329451957196
+18-54-39 - INFO - {'0-1': 'LAUNCH_8_S1EWN'}
+18-54-39 - INFO - <step_20>, remaining_time=60.0
+18-54-39 - INFO - boards generated
+18-54-39 - INFO - normalized
+18-54-39 - INFO - danger level added
+18-54-40 - INFO - gravity added
+18-54-40 - INFO - highways added
+18-54-40 - INFO - attack detected : {}
+18-54-40 - INFO - incoming : []
+18-54-40 - INFO - found in 2000
+18-54-40 - INFO - best ship : E5SNW sends 8 ships with value of 1.5376984090459005
+18-54-40 - INFO - {'0-1': 'LAUNCH_8_E5SNW'}
+18-54-40 - INFO - <step_21>, remaining_time=60.0
+18-54-40 - INFO - boards generated
+18-54-40 - INFO - normalized
+18-54-40 - INFO - danger level added
+18-54-41 - INFO - gravity added
+18-54-41 - INFO - highways added
+18-54-41 - INFO - attack detected : {}
+18-54-41 - INFO - incoming : []
+18-54-41 - INFO - found in 861
+18-54-41 - INFO - {'0-1': 'SPAWN_4'}
+18-54-41 - INFO - <step_22>, remaining_time=60.0
+18-54-41 - INFO - boards generated
+18-54-41 - INFO - normalized

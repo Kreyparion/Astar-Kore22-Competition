@@ -669,15 +669,19 @@ class Board:
 
     def print_kore(self: 'Board') -> None:
         size = self.configuration.size
-        print(self.configuration.size * "=")
+        print("[",end="")
         for i in range(size):
-            row = ""
+            row = "["
             for j in range(size):
                 pos = Point(j, size - 1 - i)
                 curr_cell = self.cells[pos]
-                row += str(int(curr_cell.kore)) + ","
-            print(row)
-        print(self.configuration.size * "=")
+                row += str(int(curr_cell.kore))
+                if j != size -1:
+                    row += ","
+            print(row+"]",end="")
+            if i != size -1:
+                print(",")
+        print("]")
 
     def next(self) -> 'Board':
         """

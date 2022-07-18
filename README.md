@@ -2,9 +2,14 @@
 *By Julien Cardinal*
 
 ## Startup
-Run the main.ipynb file that plays the main agent against the top agent of the beta version 
+Run the **main.ipynb** file that plays the main agent against the top agent of the beta version 
 https://github.com/w9PcJLyb/kore-beta-bot. I don't really use his code for any other reasons than to challenge mine. Thanks to him, it was a really good baseline to improve my code !
 
+All the code is in **main.py**
+
+## Tests
+
+In the **test_agent.ipynb** file, there are a lot of tests on customized maps to evaluate the agent in different situations. This is the laboratory to evaluate the different parameters fast enough.
 
 # Cooperative A* 3d with gravity
 

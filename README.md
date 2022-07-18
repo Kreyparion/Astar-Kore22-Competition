@@ -23,13 +23,13 @@ The idea is that the astar algorithm will only continue the routes where the heu
 #### First attempt and ideas
 We can think of doing some funnels with the gravity point at the bottom and maybe try a smoothing function in the x and y direction with t decreasing :
 
-![Funel](docs/Funel.png)
+<img src="docs/Funel.png" width="250" />
 
 We could do that by applying a 3 x 3 filter, maybe something like this :
 ```python
 filter = [[0,1,0],
-		  [1,1,1],
-		  [0,1,0]]
+	  [1,1,1],
+	  [0,1,0]]
 # with every value divided by a certain value so that it doesn't diverge
 ```
 Here the center value is calculated on the board at the starting point (where we want the gravity value), the ones directly adjacent are calculated from the next board (at **t+1**) at the corresponding position in x and y (as if it were on the same board)
@@ -37,7 +37,7 @@ Here the center value is calculated on the board at the starting point (where we
 All the test were done in a separate file (filter_test.py) with matplotlib to visualize the gravity on each layer
 This is a result for a rather even filter and one gravity center that stays that way on every steps :
 
-![even funel 3x3](docs/even_funel.png)
+<img src="docs/even_funel.png" width="250" />
 
 #### The best filter
 The idea is that de diagonals are not important to pull a ship toward an objective, the fleets travel more efficiently in straight lines (either on the **x** axis or on the **y** axis)
@@ -53,15 +53,22 @@ The selection criteria for a filter depends on many factors :
 - The values in the straight lines must be decreasing from the source with linear pace, I chose to get close to something like [v v/2 v/3 v/4 v/5]
 
 The best 3x3 filter for the job was not very viable as the bias was too important and the diagonals were too impacted, here's the shape of it :
-![3x3 filter](docs/funel_3x3.png)
+
+<img src="docs/funel_3x3.png" width="250" />
 
 A 5x5 filter was necessary here and it was made so that we can have a maximum of zeros and reduce the temporal complexity.
-![best_funel_5x5](docs/best_funel_5x5.png)
+
+<img src="docs/best_funel_5x5.png" width="250" />
 
 With such a filter it makes the routes appears on the map :
-![Kore map](docs/Kore_map.png)
-
-![Filtered kore map](docs/filtered_kore_map.png)
+<div style="display:flex">
+	<div style="flex:1;padding-right:5px;">
+		<img src="docs/Kore_map.png" width="250" />
+	</div>
+	<div style="flex:1">
+	<img src="docs/filtered_kore_map.png" width="250" />
+	</div>
+</div>
 
 The filter :
 ```python
@@ -73,10 +80,10 @@ e = 1.25 * dimin
 ratio = 3.2/10
 
 filter = [[0,l,e,l,0],
-		  [l,c,d,c,l],
-		  [e,d,0,d,e],
-		  [l,c,d,c,l],
-		  [0,l,e,l,0]]
+	  [l,c,d,c,l],
+	  [e,d,0,d,e],
+	  [l,c,d,c,l],
+	  [0,l,e,l,0]]
 ```
 
 ## Generate the danger level
@@ -127,3 +134,8 @@ The upgrade is to store every possible destination(by not doing the final step o
 ### Changes for Danger level
 The danger level is the only function where the time cost increase with the number of shipyard. Which is a big problem in the endgame. We chose here to reduce the area of influence of enemy shipyard as the turn's number increase. From 10 cells to 6 if the enemy has more than 24 shipyards.
 
+# To Conclude
+This was a nice Competition and I had a lot of fun taking part ! I Hope you'll find some interesting ideas in my code ! (Don't forget to star the repo if you've made it this far, that would be much appreciated 🤗)
+I had a lot of problems with the time complexity because it seemed impossible to reduce it to an acceptable value. I took a mounth off in the middle of the competition and I was able to do my first submission one week before the deadline. So I made some strategies for midgame and endgame in record time, those are not the best and surely need to be reworked.
+
+For the result, I was happy to be in the top 100, with a submission with some random values for the heuristic. I am sure that the heuristic can be improved a lot as I didn't like to spend too much time to tweek the parameters.

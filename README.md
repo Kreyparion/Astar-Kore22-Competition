@@ -62,11 +62,11 @@ A 5x5 filter was necessary here and it was made so that we can have a maximum of
 
 With such a filter it makes the routes appears on the map :
 <div style="display:flex">
-	<div style="flex:1;padding-right:5px;">
+	<div style="flex:1;padding-right:10px;">
 		<img src="docs/Kore_map.png" width="250" />
 	</div>
-	<div style="flex:1">
-	<img src="docs/filtered_kore_map.png" width="250" />
+	<div style="flex:1;padding-left:10px;">
+		<img src="docs/filtered_kore_map.png" width="250" />
 	</div>
 </div>
 

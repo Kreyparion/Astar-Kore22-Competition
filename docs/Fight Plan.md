@@ -1,3 +1,19 @@
+
+# Early game
+## Use opponents mistakes
+-> intercept lonly ships
+
+-> overtake the oponents shipyar for 1 turn if it's unprotected
+
+## Optimised mining
+---> Calculate the purcentage of 8, 21 and more with the repartition of the kores on the map
+
+-> [[Mine with 8|Use 8]] to mine surroundings kore
+-> [[Mine with 21|Use 21]] to mine the kores that are a little bit far away
+-> [[Mine with big ships|Use big ships]] to mine the central Kore (try not to unprotect the shipyard)
+
+# Middle Game
+
 ## Prepare for battle
 -> Regroup all the ships without summoning new ones for a special action
 

@@ -1,5 +1,3 @@
-from turtle import pos
-from urllib.parse import MAX_CACHE_SIZE
 from xmlrpc.client import Boolean
 from kore_fleets import balanced_agent, random_agent, do_nothing_agent
 from logger import logger, init_logger
@@ -11,7 +9,6 @@ import time
 from copy import deepcopy
 from typing import List, Dict, Tuple, Union, Any
 import matplotlib.pyplot as plt
-import kaggle_environments.envs.kore_fleets.helpers
 
 external_timer = time.time()
 turn = 0
@@ -2282,10 +2279,6 @@ def agent(obs: Observation, config: Configuration):
 
 if __name__ == "__main__":
     from kaggle_environments import make
-    for tries in range(10):
-        try_number = tries
-        env = make("kore_fleets",debug = True)
-        print("try number ",tries+1)
-        print(env.name, env.version)
-
-        env.run([agent,balanced_agent])
+    env = make("kore_fleets",debug = True)
+    print(env.name, env.version)
+    env.run([agent,balanced_agent])

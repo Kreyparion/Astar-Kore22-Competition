@@ -61,14 +61,10 @@ A 5x5 filter was necessary here and it was made so that we can have a maximum of
 <img src="docs/best_funel_5x5.png" width="250" />
 
 With such a filter it makes the routes appears on the map :
-<div style="display:flex">
-	<div style="flex:1;padding-right:10px;">
-		<img src="docs/Kore_map.png" width="250" />
-	</div>
-	<div style="flex:1;padding-left:10px;">
-		<img src="docs/filtered_kore_map.png" width="250" />
-	</div>
-</div>
+<p float="left">
+	<img src="docs/Kore_map.png" width="250" />
+	<img src="docs/filtered_kore_map.png" width="250" />
+</p>
 
 The filter :
 ```python

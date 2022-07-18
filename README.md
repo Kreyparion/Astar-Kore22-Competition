@@ -109,3 +109,21 @@ This is all to make sure that we converge as quick as possible towards the best 
 
 
 # Time complexity
+
+To submit the code, it was basicly required to take less than 2s at every steps. It meant we had to improve the time complexity of every part of the code.
+### Changes for board predict
+The prediction of the next few boards take almost 1s at every step and there is nothing to do about it other than reprogram it completely...
+To minimize this cost, we fixed the number of boards predicted to 30 (it was initially 40). That could be a little bit constraining if we ever want long routes for our ships
+
+### Changes for gravity
+The Gravity is the most time consuming function. To apply it, we chose to use a filter with more zeros and we also took apart the for loop that was doing unefficient calculations.
+An other way to reduce the computing cost is to save a part of it in a variable for the next step and only compute the missing values. (This is the function I called Load_Gravity)
+
+### Changes for Astar
+Astar had to be capped in a certain way, otherwise it would never stop.
+My first way of doing that was to only take into account when the ship arrive at a destination (the step of arriving there has to be the best step) but in doing so, there are many times when the agent get lost and retrieve 0 destination. I would cap the algorithme at a maximum of 5 destinations.
+The upgrade is to store every possible destination(by not doing the final step of reaching there), which is a lot because of the highways. And then afterwards select the best one. With this method we always get a result(that can have a value below 0). And we cap the number of steps (cell visited) to be sure of the execution time. We oberved that with the current setup, it was too costly to go beyond 2000 steps of the astar program, so we caped at 2000 steps in total, which makes sometimes only 100 when there are 20 shipyards. 
+
+### Changes for Danger level
+The danger level is the only function where the time cost increase with the number of shipyard. Which is a big problem in the endgame. We chose here to reduce the area of influence of enemy shipyard as the turn's number increase. From 10 cells to 6 if the enemy has more than 24 shipyards.
+

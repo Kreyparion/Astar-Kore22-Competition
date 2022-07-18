@@ -118,25 +118,25 @@ This is all to make sure that we converge as quick as possible towards the best 
 
 # Time complexity
 
-To submit the code, it was basicly required to take less than 2s at every steps. It meant we had to improve the time complexity of every part of the code.
+To submit the code, it was basically required to take less than 2s at every steps. It meant we had to improve the time complexity of every part of the code.
 ### Changes for board predict
 The prediction of the next few boards take almost 1s at every step and there is nothing to do about it other than reprogram it completely...
 To minimize this cost, we fixed the number of boards predicted to 30 (it was initially 40). That could be a little bit constraining if we ever want long routes for our ships
 
 ### Changes for gravity
-The Gravity is the most time consuming function. To apply it, we chose to use a filter with more zeros and we also took apart the for loop that was doing unefficient calculations.
+The Gravity is the most time consuming function. To apply it, we chose to use a filter with more zeros and we also took apart the for loop that was doing inefficient calculations.
 An other way to reduce the computing cost is to save a part of it in a variable for the next step and only compute the missing values. (This is the function I called Load_Gravity)
 
 ### Changes for Astar
 Astar had to be capped in a certain way, otherwise it would never stop.
-My first way of doing that was to only take into account when the ship arrive at a destination (the step of arriving there has to be the best step) but in doing so, there are many times when the agent get lost and retrieve 0 destination. I would cap the algorithme at a maximum of 5 destinations.
-The upgrade is to store every possible destination(by not doing the final step of reaching there), which is a lot because of the highways. And then afterwards select the best one. With this method we always get a result(that can have a value below 0). And we cap the number of steps (cell visited) to be sure of the execution time. We oberved that with the current setup, it was too costly to go beyond 2000 steps of the astar program, so we caped at 2000 steps in total, which makes sometimes only 100 when there are 20 shipyards. 
+My first way of doing that was to only take into account when the ship arrive at a destination (the step of arriving there has to be the best step) but in doing so, there are many times when the agent get lost and retrieve 0 destination. I would cap the algorithm at a maximum of 5 destinations.
+The upgrade is to store every possible destination(by not doing the final step of reaching there), which is a lot because of the highways. And then afterwards select the best one. With this method we always get a result(that can have a value below 0). And we cap the number of steps (cell visited) to be sure of the execution time. We observed that with the current setup, it was too costly to go beyond 2000 steps of the astar program, so we caped at 2000 steps in total, which makes sometimes only 100 when there are 20 shipyards. 
 
 ### Changes for Danger level
 The danger level is the only function where the time cost increase with the number of shipyard. Which is a big problem in the endgame. We chose here to reduce the area of influence of enemy shipyard as the turn's number increase. From 10 cells to 6 if the enemy has more than 24 shipyards.
 
 # To Conclude
 This was a nice Competition and I had a lot of fun taking part ! I Hope you'll find some interesting ideas in my code ! (Don't forget to star the repo if you've made it this far, that would be much appreciated 🤗)
-I had a lot of problems with the time complexity because it seemed impossible to reduce it to an acceptable value. I took a mounth off in the middle of the competition and I was able to do my first submission one week before the deadline. So I made some strategies for midgame and endgame in record time, those are not the best and surely need to be reworked.
+I had a lot of problems with the time complexity because it seemed impossible to reduce it to an acceptable value. I took a month off in the middle of the competition and I was able to do my first submission one week before the deadline. So I made some strategies for midgame and endgame in record time, those are not the best and surely need to be reworked.
 
-For the result, I was happy to be in the top 100, with a submission with some random values for the heuristic. I am sure that the heuristic can be improved a lot as I didn't like to spend too much time to tweek the parameters.
+For the result, I was happy to be in the top 100, with a submission with some random values for the heuristic. I am sure that the heuristic can be improved a lot as I didn't like to spend too much time to tweak the parameters.

@@ -2,9 +2,9 @@
 *By Julien Cardinal*
 
 ## Startup
-Run the **main.ipynb** file that plays against the balanced agent. You can download the top agent of the beta version to have a more challenging opponent https://github.com/w9PcJLyb/kore-beta-bot. I wanted to thank him, it was a really good baseline to improve my code and get a sense to what should be done in the endgame.
+Run the **main.ipynb** file that plays against the balanced agent. You can download the top agent of the beta version to have a more challenging opponent https://github.com/w9PcJLyb/kore-beta-bot. I wanted to thank him, it was a really good baseline to improve my code and get a sense of what should be done in the endgame.
 
-All the code is in **main.py**
+All the code is in **main.py** and was made for the kaggle competition [Kore 2022](https://www.kaggle.com/competitions/kore-2022)
 
 ## Tests
 
@@ -44,7 +44,7 @@ This is a result for a rather even filter and one gravity center that stays that
 <img src="docs/even_funel.png" width="250" />
 
 #### The best filter
-The idea is that de diagonals are not important to pull a ship toward an objective, the fleets travel more efficiently in straight lines (either on the **x** axis or on the **y** axis)
+The idea is that the diagonals are not important to pull a ship toward an objective, the fleets travel more efficiently in straight lines (either on the **x** axis or on the **y** axis)
 Also a fleet can easily detect a good center of gravity by passing by a perpendicular line and having the gravity in diagonal points can clog the gravity map, whereas focusing on the lines makes routes for the fleet appear.
 
 The selection criteria for a filter depends on many factors :

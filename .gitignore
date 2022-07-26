@@ -3,8 +3,6 @@
 agent/game.log
 agent/__pycache__
 
-lib/__pycache__
-lib/.vscode
 
 .env
 

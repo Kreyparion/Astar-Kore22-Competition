@@ -2,8 +2,7 @@
 *By Julien Cardinal*
 
 ## Startup
-Run the **main.ipynb** file that plays the main agent against the top agent of the beta version 
-https://github.com/w9PcJLyb/kore-beta-bot. I don't really use his code for any other reasons than to challenge mine. Thanks to him, it was a really good baseline to improve my code !
+Run the **main.ipynb** file that plays against the balanced agent. You can download the top agent of the beta version to have a more challenging opponent https://github.com/w9PcJLyb/kore-beta-bot. I wanted to thank him, it was a really good baseline to improve my code and get a sense to what should be done in the endgame.
 
 All the code is in **main.py**
 

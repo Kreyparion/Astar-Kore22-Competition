@@ -1,8 +1,10 @@
 .mypy_cache
 
-src/game.log
-src/__pycache__
-src/Best_agent_from_beta/__pycache__
+agent/game.log
+agent/__pycache__
+
+lib/__pycache__
+lib/.vscode
 
 .env
 
